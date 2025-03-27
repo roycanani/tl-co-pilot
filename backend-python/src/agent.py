@@ -1,6 +1,7 @@
 import ollama
 from ollama._types import Message
 from tools import upload_post
+from calendarApi import postEvent
 
 
 class Agent:
@@ -62,6 +63,18 @@ class Agent:
             # Call the upload_post function from the tools module.
             upload_post(title, description)
             return "Post uploaded successfully"
+        elif function_name == "post_event":
+            # Call postEvent with the correct parameters
+            postEvent(parameters)
+            return (
+                f"Event '{parameters.get('summary', 'No Summary')}' at '{parameters.get('location', 'No Location')}' "
+                f"has been scheduled.\nDescription: {parameters.get('description', 'No Description')}\n"
+                f"Start: {parameters.get('start', {}).get('dateTime', 'No Start Time')} "
+                f"({parameters.get('start', {}).get('timeZone', 'No Timezone')})\n"
+                f"End: {parameters.get('end', {}).get('dateTime', 'No End Time')} "
+                f"({parameters.get('end', {}).get('timeZone', 'No Timezone')})\n"
+                f"Reminders: {parameters.get('reminders', {})}"
+            )
         else:
             print("Unknown tool call.")
             return "Unknown tool call."
