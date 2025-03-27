@@ -1,0 +1,4 @@
+venv/
+__pycache__/
+# Ignore credentials file
+src/credentials.json
