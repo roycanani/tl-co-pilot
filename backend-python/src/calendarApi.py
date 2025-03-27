@@ -1,14 +1,29 @@
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from pydantic import BaseModel
 
 # Use the service account credentials
 SERVICE_ACCOUNT_FILE = "credentials.json"  # Path to your service account JSON file
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
 
 
-def postEvent(event):
+class Event(BaseModel):
+    """Represents an event in the Google Calendar."""
+
+    summary: str
+    location: str
+    description: str
+    start: dict
+    end: dict
+    reminders: dict
+
+
+def postEvent(event: Event):
     """Creates a new event in the Google Calendar."""
+    print("-----")
+    print(event)
+    print("-----")
     # Authenticate using the service account
     creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
 
@@ -25,4 +40,3 @@ def postEvent(event):
 
     except HttpError as error:
         print(f"An error occurred: {error}")
-

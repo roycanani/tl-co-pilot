@@ -1,4 +1,5 @@
 from agent import Agent
+from daily import daily
 
 
 def main():
@@ -7,17 +8,21 @@ def main():
         {
             "type": "function",
             "function": {
-                "name": "get_current_weather",
-                "description": "Get the current weather for a city",
+                "name": "add_todo",
+                "description": "Add a to-do item",
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "city": {
+                        "task": {
                             "type": "string",
-                            "description": "The name of the city",
+                            "description": "Description of the task",
+                        },
+                        "due_date": {
+                            "type": "string",
+                            "description": "Due date for the task",
                         },
                     },
-                    "required": ["city"],
+                    "required": ["task"],
                 },
             },
         },
@@ -26,21 +31,17 @@ def main():
         {
             "type": "function",
             "function": {
-                "name": "upload_post",
-                "description": "Upload post for social network for animals",
+                "name": "save_to_database",
+                "description": "Save meeting insights in the database",
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "title": {
-                            "type": "string",
-                            "description": "The title for the post",
-                        },
-                        "description": {
-                            "type": "string",
-                            "description": "The content of the post",
+                        "data": {
+                            "type": "object",
+                            "description": "The data to be saved",
                         },
                     },
-                    "required": ["title", "description"],
+                    "required": ["data"],
                 },
             },
         },
@@ -49,7 +50,7 @@ def main():
         {
             "type": "function",
             "function": {
-                "name": "post_event",
+                "name": "schedule_meeting",
                 "description": "Post an event to the calendar",
                 "parameters": {
                     "type": "object",
@@ -135,7 +136,8 @@ def main():
         },
     )
     # user_query = "Upload please post in my social network that will introduce me as a helpful assistant."
-    user_query = input("Enter a query: ")
+    # user_query = input("Enter a query: ")
+    user_query = daily
     response = agent.trigger(user_query)
     print(response.content)
 

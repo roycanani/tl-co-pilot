@@ -1,3 +1,5 @@
+from datetime import datetime
+import json
 import ollama
 from ollama._types import Message
 from tools import upload_post
@@ -8,18 +10,32 @@ class Agent:
     def __init__(self, model):
         self.model = model
         self.tools = []
+        current_date = datetime.now().strftime("%Y-%m-%d")
+
         self.conversation = [
             {
                 "role": "system",
                 "content": (
-                    "You are an intelligent and resourceful full stack team leader assistant. "
-                    "Your role is to analyze meeting transcripts, emails, and other communications "
-                    "to extract actionable insights and help manage the team's tasks and schedules. "
-                    "When a meeting or email is processed, identify key tasks, deadlines, and events, "
-                    "and trigger appropriate tool calls to update third party services such as Google Calendar "
-                    "and Google TODO. Provide clear, concise, and context-aware responses that help the team leader "
-                    "stay organized and focused on their mission. "
-                    "If necessary, ask for additional context to perform a precise and effective action."
+                    f"You are an intelligent and resourceful full stack team leader assistant. Today's date is {current_date}. "
+                    "Your role is to analyze meeting transcripts, emails, and other communications to extract actionable insights. "
+                    "When processing a meeting transcript, for each actionable item you identify, call the appropriate tool separately. "
+                    "\n\nTool calling examples:\n"
+                    "1. For scheduling meetings, use the exact format:\n"
+                    "   schedule_meeting({\n"
+                    '     "summary": "Meeting Title",\n'
+                    '     "location": "Meeting Room",\n'
+                    '     "description": "Meeting description",\n'
+                    '     "start": {"dateTime": "2023-03-28T10:00:00", "timeZone": "UTC"},\n'
+                    '     "end": {"dateTime": "2023-03-28T11:00:00", "timeZone": "UTC"},\n'
+                    '     "reminders": {"useDefault": true}\n'
+                    "   })\n\n"
+                    "2. For adding todos, use:\n"
+                    "   add_todo({\n"
+                    '     "task": "Follow up with team member",\n'
+                    f'     "due_date": "{current_date}"\n'
+                    "   })\n\n"
+                    "Make sure to generate separate tool calls for each actionable insight, even if there are multiple in one transcript. "
+                    "Provide clear, concise responses that help the team leader stay organized."
                 ),
             }
         ]
@@ -28,7 +44,20 @@ class Agent:
         self.tools.append(tool_definition)
 
     def trigger(self, user_query):
-        self.conversation.append({"role": "user", "content": user_query})
+        self.conversation.append(
+            {
+                "role": "user",
+                "content": (
+                    "Analyze this meeting transcript and identify ALL actionable items. For EACH item:\n"
+                    "1. If it mentions a meeting or sync (like 'sync with X', 'meet with Y', etc.), call schedule_meeting with appropriate details\n"
+                    "2. If it mentions tasks, follow-ups, or action items (like 'check with X', 'follow up on Y', etc.), call add_todo for EACH task\n"
+                    "3. For the overall meeting summary, call save_to_database\n\n"
+                    "Make sure to generate SEPARATE tool calls for EACH identified item. Don't combine multiple actions into one tool call.\n"
+                    "Here's the transcript:\n\n"
+                    f"{user_query}"
+                ),
+            }
+        )
         response: ollama.ChatResponse = ollama.chat(
             model=self.model, messages=self.conversation, tools=self.tools
         )
@@ -41,7 +70,7 @@ class Agent:
                 # Append the tool result to the conversation
                 self.conversation.append({"role": "tool", "content": tool_result})
             # Continue the conversation with the tool result as context
-            print(*self.conversation, sep="\n")
+            # print(*self.conversation, sep="\n")
             response = ollama.chat(
                 model=self.model, messages=self.conversation, tools=self.tools
             )
@@ -63,18 +92,53 @@ class Agent:
             # Call the upload_post function from the tools module.
             upload_post(title, description)
             return "Post uploaded successfully"
-        elif function_name == "post_event":
-            # Call postEvent with the correct parameters
-            postEvent(parameters)
-            return (
-                f"Event '{parameters.get('summary', 'No Summary')}' at '{parameters.get('location', 'No Location')}' "
-                f"has been scheduled.\nDescription: {parameters.get('description', 'No Description')}\n"
-                f"Start: {parameters.get('start', {}).get('dateTime', 'No Start Time')} "
-                f"({parameters.get('start', {}).get('timeZone', 'No Timezone')})\n"
-                f"End: {parameters.get('end', {}).get('dateTime', 'No End Time')} "
-                f"({parameters.get('end', {}).get('timeZone', 'No Timezone')})\n"
-                f"Reminders: {parameters.get('reminders', {})}"
-            )
+        elif function_name == "schedule_meeting":
+            try:
+                # Create safe default objects
+                current_date = datetime.now().strftime("%Y-%m-%d")
+                start_dict = {"dateTime": current_date, "timeZone": "UTC"}
+                end_dict = {"dateTime": current_date, "timeZone": "UTC"}
+
+                # Handle start parameter
+                if parameters.get("start"):
+                    if isinstance(parameters["start"], str):
+                        try:
+                            start_dict = json.loads(parameters["start"])
+                        except json.JSONDecodeError:
+                            pass
+                    elif isinstance(parameters["start"], dict):
+                        start_dict = parameters["start"]
+
+                # Handle end parameter
+                if parameters.get("end"):
+                    if isinstance(parameters["end"], str):
+                        try:
+                            end_dict = json.loads(parameters["end"])
+                        except json.JSONDecodeError:
+                            pass
+                    elif isinstance(parameters["end"], dict):
+                        end_dict = parameters["end"]
+
+                # Update the parameters with properly formatted objects
+                parameters["start"] = start_dict
+                parameters["end"] = end_dict
+
+                # Now safely call postEvent with the validated parameters
+                postEvent(parameters)
+
+                return (
+                    f"Event '{parameters.get('summary', 'No Summary')}' at '{parameters.get('location', 'No Location')}' "
+                    f"has been scheduled.\nDescription: {parameters.get('description', 'No Description')}\n"
+                    f"Start: {start_dict.get('dateTime', 'No Start Time')} "
+                    f"({start_dict.get('timeZone', 'No Timezone')})\n"
+                    f"End: {end_dict.get('dateTime', 'No End Time')} "
+                    f"({end_dict.get('timeZone', 'No Timezone')})\n"
+                    f"Reminders: {parameters.get('reminders', {})}"
+                )
+            except Exception as e:
+                print(f"Error in schedule_meeting: {e}")
+                print(f"Parameters received: {parameters}")
+                return f"Error scheduling meeting: {str(e)}"
         else:
             print("Unknown tool call.")
             return "Unknown tool call."
