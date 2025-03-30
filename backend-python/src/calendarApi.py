@@ -29,11 +29,9 @@ class Event(BaseModel):
 
 def create_flow():
     """Create an OAuth flow object."""
-    # Load client secrets
     with open(CLIENT_SECRETS_FILE, "r") as f:
         client_config = json.load(f)
 
-    # Create flow instance with client config
     flow = Flow.from_client_config(
         client_config, scopes=SCOPES, redirect_uri=REDIRECT_URI
     )
@@ -49,8 +47,7 @@ def get_authorization_url():
     return authorization_url, state
 
 
-def get_credentials_from_code(code: str, state: Optional[str] = None):
-    """Exchange authorization code for credentials."""
+def get_credentials_from_code(code: str):
     flow = create_flow()
     flow.fetch_token(code=code)
     creds = flow.credentials
@@ -92,10 +89,6 @@ def is_authorized():
 
 def postEvent(event: Event):
     """Creates a new event in the Google Calendar."""
-    print("-----")
-    print(event)
-    print("-----")
-
     # Get user credentials through OAuth
     creds = get_credentials()
     if not creds:

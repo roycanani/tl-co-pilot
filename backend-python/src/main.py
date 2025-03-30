@@ -30,7 +30,6 @@ app.add_middleware(SessionMiddleware, secret_key=secrets.token_urlsafe(32))
 # Initialize agent once to be reused across requests
 agent = Agent("llama3.2")
 
-
 # Add tools to the agent during initialization
 agent.add_tool(
     {
@@ -201,28 +200,20 @@ async def test_with_sample():
 
 @app.get("/authorize")
 async def authorize(request: Request):
-    """Start OAuth authorization flow."""
     authorization_url, state = calendarApi.get_authorization_url()
-
-    # Store state in session for verification
     request.session["oauth_state"] = state
 
-    # For Swagger UI, it's better to return the URL rather than redirecting
-    # This allows the frontend to handle the redirect properly
     return {"authorization_url": authorization_url}
 
 
 @app.get("/oauth2callback")
 async def oauth2callback(request: Request, code: str, state: Optional[str] = None):
-    """Handle OAuth callback from Google."""
-    # Verify state from OAuth flow
     session_state = request.session.get("oauth_state")
     if not session_state or state != session_state:
         raise HTTPException(status_code=400, detail="Invalid OAuth state")
 
-    # Exchange code for credentials
     try:
-        calendarApi.get_credentials_from_code(code, state)
+        calendarApi.get_credentials_from_code(code)
         return {"message": "Authentication successful! You can close this window."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Authentication error: {str(e)}")

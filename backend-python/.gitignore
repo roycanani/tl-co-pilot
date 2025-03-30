@@ -3,3 +3,4 @@ __pycache__/
 # Ignore credentials file
 src/credentials.json
 client_secret.json
+token.pickle
