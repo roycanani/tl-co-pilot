@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from typing import Dict, Any
 
 # Import authentication functions
-from .auth import get_credentials
+from auth import get_credentials
 
 # OAuth configuration
 CLIENT_SECRETS_FILE = "client_secret.json"  # Path to OAuth client secrets JSON

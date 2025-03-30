@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 import secrets
 
-from .auth import get_authorization_url, get_credentials_from_code, is_authorized
+from auth import get_authorization_url, get_credentials_from_code, is_authorized
 
 # Create FastAPI app
 app = FastAPI(
