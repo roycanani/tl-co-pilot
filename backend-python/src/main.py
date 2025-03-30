@@ -4,10 +4,11 @@ from pydantic import BaseModel
 from typing import Optional, Dict, Any, List, Union
 from agent import Agent
 from daily import daily  # Keep this for testing if needed
-import calendarApi
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 import secrets
+
+from .auth import get_authorization_url, get_credentials_from_code, is_authorized
 
 # Create FastAPI app
 app = FastAPI(
@@ -200,7 +201,7 @@ async def test_with_sample():
 
 @app.get("/authorize")
 async def authorize(request: Request):
-    authorization_url, state = calendarApi.get_authorization_url()
+    authorization_url, state = get_authorization_url()
     request.session["oauth_state"] = state
 
     return {"authorization_url": authorization_url}
@@ -213,7 +214,7 @@ async def oauth2callback(request: Request, code: str, state: Optional[str] = Non
         raise HTTPException(status_code=400, detail="Invalid OAuth state")
 
     try:
-        calendarApi.get_credentials_from_code(code)
+        get_credentials_from_code(code)
         return {"message": "Authentication successful! You can close this window."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Authentication error: {str(e)}")
@@ -222,7 +223,7 @@ async def oauth2callback(request: Request, code: str, state: Optional[str] = Non
 @app.get("/auth/status")
 async def auth_status():
     """Check if user is authorized."""
-    return {"authorized": calendarApi.is_authorized()}
+    return {"authorized": is_authorized()}
 
 
 # ... [existing endpoints remain unchanged] ...
