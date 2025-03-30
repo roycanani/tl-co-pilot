@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 import secrets
 
+
 from auth import get_authorization_url, get_credentials_from_code, is_authorized
 
 # Create FastAPI app
@@ -30,121 +31,6 @@ app.add_middleware(SessionMiddleware, secret_key=secrets.token_urlsafe(32))
 
 # Initialize agent once to be reused across requests
 agent = Agent("llama3.1")
-
-# Add tools to the agent during initialization
-agent.add_tool(
-    {
-        "type": "function",
-        "function": {
-            "name": "add_todo",
-            "description": "Add a to-do item",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "task": {
-                        "type": "string",
-                        "description": "Description of the task",
-                    },
-                    "due_date": {
-                        "type": "string",
-                        "description": "Due date for the task",
-                    },
-                },
-                "required": ["task"],
-            },
-        },
-    }
-)
-
-agent.add_tool(
-    {
-        "type": "function",
-        "function": {
-            "name": "schedule_meeting",
-            "description": "Post an event to the calendar",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "summary": {
-                        "type": "string",
-                        "description": "The name or summary of the event",
-                    },
-                    "location": {
-                        "type": "string",
-                        "description": "The location of the event",
-                    },
-                    "description": {
-                        "type": "string",
-                        "description": "Details or description of the event",
-                    },
-                    "start": {
-                        "type": "object",
-                        "properties": {
-                            "dateTime": {
-                                "type": "string",
-                                "description": "Start time in ISO format",
-                            },
-                            "timeZone": {
-                                "type": "string",
-                                "description": "Timezone of the start time",
-                            },
-                        },
-                        "required": ["dateTime", "timeZone"],
-                    },
-                    "end": {
-                        "type": "object",
-                        "properties": {
-                            "dateTime": {
-                                "type": "string",
-                                "description": "End time in ISO format",
-                            },
-                            "timeZone": {
-                                "type": "string",
-                                "description": "Timezone of the end time",
-                            },
-                        },
-                        "required": ["dateTime", "timeZone"],
-                    },
-                    "reminders": {
-                        "type": "object",
-                        "properties": {
-                            "useDefault": {
-                                "type": "boolean",
-                                "description": "Whether to use default reminders",
-                            },
-                            "overrides": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "method": {
-                                            "type": "string",
-                                            "description": "Reminder method (e.g., email, popup)",
-                                        },
-                                        "minutes": {
-                                            "type": "integer",
-                                            "description": "Minutes before the event to trigger the reminder",
-                                        },
-                                    },
-                                    "required": ["method", "minutes"],
-                                },
-                            },
-                        },
-                        "required": ["useDefault"],
-                    },
-                },
-                "required": [
-                    "summary",
-                    "location",
-                    "description",
-                    "start",
-                    "end",
-                    "reminders",
-                ],
-            },
-        },
-    }
-)
 
 
 # Define request model
@@ -177,9 +63,10 @@ async def process_transcript(request: TranscriptRequest):
 @app.get("/test")
 async def test_with_sample():
     response = agent.trigger(daily)
-    return ProcessResponse(
-        content=response.get("content", ""), tool_calls=response.get("tool_calls", [])
-    )
+    return response
+    # return ProcessResponse(
+    #     content=response.get("content", ""), tool_calls=response.get("tool_calls", [])
+    # )
 
 
 @app.get("/authorize")
@@ -208,8 +95,6 @@ async def auth_status():
     """Check if user is authorized."""
     return {"authorized": is_authorized()}
 
-
-# ... [existing endpoints remain unchanged] ...
 
 if __name__ == "__main__":
     import uvicorn
