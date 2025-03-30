@@ -3,7 +3,7 @@ import json
 import ollama
 from ollama._types import Message
 from tools import upload_post
-from calendarApi import postEvent
+from calendarApi import Event, postEvent
 
 
 class Agent:
@@ -51,7 +51,6 @@ class Agent:
                     "Analyze this meeting transcript and identify ALL actionable items. For EACH item:\n"
                     "1. If it mentions a meeting or sync (like 'sync with X', 'meet with Y', etc.), call schedule_meeting with appropriate details\n"
                     "2. If it mentions tasks, follow-ups, or action items (like 'check with X', 'follow up on Y', etc.), call add_todo for EACH task\n"
-                    "3. For the overall meeting summary, call save_to_database\n\n"
                     "Make sure to generate SEPARATE tool calls for EACH identified item. Don't combine multiple actions into one tool call.\n"
                     "Here's the transcript:\n\n"
                     f"{user_query}"
@@ -62,7 +61,9 @@ class Agent:
             model=self.model, messages=self.conversation, tools=self.tools
         )
         self.conversation.append(response.get("message", {}))
-
+        print("Response from model:")
+        print(len(response.message.tool_calls))
+        print(response.message.tool_calls)
         # Check for tool calls and iterate until no tool call is returned.
         while response.message.tool_calls:
             for tool_call in response.message.tool_calls:
@@ -123,8 +124,7 @@ class Agent:
                 parameters["start"] = start_dict
                 parameters["end"] = end_dict
 
-                # Now safely call postEvent with the validated parameters
-                postEvent(parameters)
+                postEvent(Event.model_validate(parameters))
 
                 return (
                     f"Event '{parameters.get('summary', 'No Summary')}' at '{parameters.get('location', 'No Location')}' "

@@ -29,7 +29,7 @@ app.add_middleware(
 app.add_middleware(SessionMiddleware, secret_key=secrets.token_urlsafe(32))
 
 # Initialize agent once to be reused across requests
-agent = Agent("llama3.2")
+agent = Agent("llama3.1")
 
 # Add tools to the agent during initialization
 agent.add_tool(
@@ -51,23 +51,6 @@ agent.add_tool(
                     },
                 },
                 "required": ["task"],
-            },
-        },
-    }
-)
-
-agent.add_tool(
-    {
-        "type": "function",
-        "function": {
-            "name": "save_to_database",
-            "description": "Save meeting insights in the database",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "data": {"type": "object", "description": "The data to be saved"}
-                },
-                "required": ["data"],
             },
         },
     }
