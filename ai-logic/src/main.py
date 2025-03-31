@@ -1,7 +1,6 @@
-from fastapi import FastAPI, HTTPException, Request, Response, Depends
-from fastapi.responses import RedirectResponse
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
-from typing import Optional, Dict, Any, List, Union
+from typing import Optional, Dict, Any, List
 from agent import Agent
 from daily import daily  # Keep this for testing if needed
 from fastapi.middleware.cors import CORSMiddleware
@@ -29,28 +28,32 @@ app.add_middleware(
 app.add_middleware(SessionMiddleware, secret_key=secrets.token_urlsafe(32))
 
 # Initialize agent once to be reused across requests
-agent = Agent("llama3.1")
+agent = Agent("llama3.2")
 
 # Add tools to the agent during initialization
 agent.add_tool(
     {
         "type": "function",
         "function": {
-            "name": "add_todo",
-            "description": "Add a to-do item",
+            "name": "add_task",
+            "description": "Add a to-do item to Google Tasks",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "task": {
+                    "title": {
                         "type": "string",
-                        "description": "Description of the task",
+                        "description": "Title of the task",
                     },
-                    "due_date": {
+                    "notes": {
                         "type": "string",
-                        "description": "Due date for the task",
+                        "description": "Additional notes for the task",
+                    },
+                    "due": {
+                        "type": "string",
+                        "description": "Due date for the task in ISO 8601 format (e.g., '2025-03-31T10:00:00Z')",
                     },
                 },
-                "required": ["task"],
+                "required": ["title", "notes", "due"],
             },
         },
     }

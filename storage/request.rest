@@ -1,0 +1,60 @@
+/////// Posts ///////
+
+
+### Create Post
+POST http://localhost:3000/posts
+
+{
+  "title": "Hello", "senderId": "677ff5652758ff9eb4710a1c", "content": "Hello World!"
+}
+
+### Get All posts
+GET http://localhost:3000/posts
+
+### Get Posts By Sender
+GET http://localhost:3000/posts?sender=Uri
+
+### Get Post By Id
+GET http://localhost:3000/posts/677ec351d954efe3eefc4d21
+
+### Update Post
+PUT http://localhost:3000/posts/677ec351d954efe3eefc4d21
+
+{
+    "title": "Hello2"
+}
+
+### DELETE Post
+PUT http://localhost:3000/posts/677ec351d954efe3eefc4d21
+
+
+/////// Comments ///////
+
+### Create Comment
+POST http://localhost:3000/comments
+
+{
+  "postId": "677ec408d954efe3eefc4d2a", 
+  "sender": "Uri",
+  "content": "Hello World!"
+}
+
+### Get All Comments
+GET http://localhost:3000/comments
+
+### Get All Comments By PostId 
+GET http://localhost:3000/comments?postId=
+
+### Get Comment By Id
+GET http://localhost:3000/comments/
+
+### Update Comment
+PUT http://localhost:3000/comments/677ec432d954efe3eefc4d2e
+
+{
+  "content": "Hello World2!"
+}
+
+### Delete Comment
+DELETE http://localhost:3000/comments/677ec432d954efe3eefc4d2e
+

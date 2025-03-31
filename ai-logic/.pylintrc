@@ -1,0 +1,6 @@
+[MASTER]
+init-hook='import sys; sys.path.append(r"c:\Users\Admin\Documents\tl-co-pilot\backend-python\venv\Lib\site-packages")'
+ignored-paths=c:\Users\Admin\Documents\tl-co-pilot\backend-python\venv
+
+[MESSAGES CONTROL]
+disable=C0114, C0115, C0116  ; Disable missing module, class, and function docstrings

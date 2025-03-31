@@ -2,15 +2,10 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from pydantic import BaseModel
 from typing import Dict, Any
+import requests
 
 # Import authentication functions
 from auth import get_credentials
-
-# OAuth configuration
-CLIENT_SECRETS_FILE = "client_secret.json"  # Path to OAuth client secrets JSON
-TOKEN_FILE = "token.pickle"  # Path to store user tokens
-SCOPES = ["https://www.googleapis.com/auth/calendar"]
-REDIRECT_URI = "http://localhost:8000/oauth2callback"
 
 
 class Event(BaseModel):
@@ -43,7 +38,16 @@ def postEvent(event: Event) -> Dict[str, Any]:
             service.events().insert(calendarId=calendar_id, body=event_dict).execute()
         )
 
-        print(f"Event created: {created_event.get('htmlLink')}")
+        # requests.post(
+        #     "http://localhost:3000/events",
+        #     headers={
+        #         "accept": "application/json, text/plain, */*",
+        #     },
+        #     json=created_event,
+        #     verify=False,
+        # )
+        print(f"Event created: {created_event}")
+
         return created_event
 
     except HttpError as error:

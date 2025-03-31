@@ -1,3 +1,12 @@
 {
-    "python.defaultInterpreterPath": "/venv/bin/python",
+  "python.defaultInterpreterPath": "C:\\Users\\Admin\\Documents\\tl-co-pilot\\backend-python\\venv\\Scripts\\python.exe",
+  "python.testing.unittestArgs": [
+    "-v",
+    "-s",
+    "./backend-python",
+    "-p",
+    "*test*.py"
+  ],
+  "python.testing.pytestEnabled": false,
+  "python.testing.unittestEnabled": true,
 }
