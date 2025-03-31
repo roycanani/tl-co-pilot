@@ -2,8 +2,9 @@ from datetime import datetime
 import json
 import ollama
 from ollama._types import Message
-from tools import upload_post
-from calendarApi import Event, postEvent
+from tools.posts import upload_post
+from tools.events import Event, postEvent
+from tools.tasks import Task, postTask
 
 
 class Agent:
@@ -29,10 +30,11 @@ class Agent:
                     '     "end": {"dateTime": "2023-03-28T11:00:00", "timeZone": "UTC"},\n'
                     '     "reminders": {"useDefault": true}\n'
                     "   })\n\n"
-                    "2. For adding todos, use:\n"
-                    "   add_todo({\n"
-                    '     "task": "Follow up with team member",\n'
-                    f'     "due_date": "{current_date}"\n'
+                    "2. For adding tasks, use:\n"
+                    "   add_task({\n"
+                    '     "title": "Follow up with team member",\n'
+                    '     "notes": "Discuss project updates",\n'
+                    f'     "due": "{current_date}T17:00:00Z"\n'
                     "   })\n\n"
                     "Make sure to generate separate tool calls for each actionable insight, even if there are multiple in one transcript. "
                     "Provide clear, concise responses that help the team leader stay organized."
@@ -50,7 +52,7 @@ class Agent:
                 "content": (
                     "Analyze this meeting transcript and identify ALL actionable items. For EACH item:\n"
                     "1. If it mentions a meeting or sync (like 'sync with X', 'meet with Y', etc.), call schedule_meeting with appropriate details\n"
-                    "2. If it mentions tasks, follow-ups, or action items (like 'check with X', 'follow up on Y', etc.), call add_todo for EACH task\n"
+                    "2. If it mentions tasks, follow-ups, or action items (like 'check with X', 'follow up on Y', etc.), call add_task for EACH task\n"
                     "Make sure to generate SEPARATE tool calls for EACH identified item. Don't combine multiple actions into one tool call.\n"
                     "Here's the transcript:\n\n"
                     f"{user_query}"
@@ -139,6 +141,14 @@ class Agent:
                 print(f"Error in schedule_meeting: {e}")
                 print(f"Parameters received: {parameters}")
                 return f"Error scheduling meeting: {str(e)}"
+        elif function_name == "add_task":
+            try:
+                postTask(Task.model_validate(parameters))
+            except Exception as e:
+                print(f"Error in add_task: {e}")
+                print(f"Parameters received: {parameters}")
+                return f"Error add_task: {str(e)}"
+
         else:
             print("Unknown tool call.")
             return "Unknown tool call."

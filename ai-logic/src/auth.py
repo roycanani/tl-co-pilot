@@ -9,7 +9,13 @@ from typing import Optional, Tuple
 # OAuth configuration
 CLIENT_SECRETS_FILE = "client_secret.json"  # Path to OAuth client secrets JSON
 TOKEN_FILE = "token.pickle"  # Path to store user tokens
-SCOPES = ["https://www.googleapis.com/auth/calendar"]
+SCOPES = [
+    "https://www.googleapis.com/auth/calendar",
+    "https://www.googleapis.com/auth/tasks",
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/userinfo.profile",
+    "openid",
+]
 REDIRECT_URI = "http://localhost:8000/oauth2callback"
 
 
