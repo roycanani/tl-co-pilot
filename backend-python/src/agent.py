@@ -1,26 +1,15 @@
 from datetime import datetime
-import json
-from typing import List, Dict, Any, Optional
+from typing import Dict, Any, Optional
 
 from langchain_ollama import ChatOllama
-from langchain.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.messages import (
     HumanMessage,
     SystemMessage,
-    AIMessage,
-    ToolMessage,
-    BaseMessage,
-    ChatMessage,
 )
-from langchain.agents import Tool, create_tool_calling_agent
-from langchain_core.tools import BaseTool
-from langchain.agents import create_openai_functions_agent
-from langchain.agents import AgentExecutor
+from langchain.agents import Tool
 from langchain_core.pydantic_v1 import BaseModel, Field
 
-from tools import upload_post
-from calendarApi import Event, add_todo, schedule_meeting
+from calendarApi import add_todo, schedule_meeting
 
 
 class AddTodoInput(BaseModel):
@@ -47,7 +36,7 @@ class Agent:
 
         self.system_message = SystemMessage(
             content=(
-                f"You are an intelligent and resourceful full stack team leader assistant. Today's date is {current_date}. "
+                f"You are an intelligent and resourceful full stack team leader assistant. Today's date is {current_date}. in timezone UTC"
                 "Your role is to analyze meeting transcripts, emails, and other communications to extract actionable insights. "
                 "extract as many as possible actionable items from the transcript. "
                 "When processing a meeting transcript, for each actionable item you identify, call the appropriate tool separately. "
@@ -55,74 +44,6 @@ class Agent:
         )
 
         self.messages = [self.system_message]
-
-        # Initialize default tools
-        self._initialize_default_tools()
-
-    def _initialize_default_tools(self):
-        # Add todo tool
-        self.add_tool(
-            {
-                "type": "function",
-                "function": {
-                    "name": "add_todo",
-                    "description": "Add a to-do item",
-                    "parameters": AddTodoInput.schema(),
-                },
-            }
-        )
-
-        # Schedule meeting tool
-        self.add_tool(
-            {
-                "type": "function",
-                "function": {
-                    "name": "schedule_meeting",
-                    "description": "Post an event to the calendar",
-                    "parameters": ScheduleMeetingInput.schema(),
-                },
-            }
-        )
-
-    def add_todo(self, task: str, due_date: Optional[str] = None) -> str:
-        """Add a to-do item to the task list."""
-        # This would typically connect to a task management system
-        print(f"Adding todo: {task} due {due_date}")
-        return f"Added todo: {task}" + (f" due {due_date}" if due_date else "")
-
-    def schedule_meeting(
-        self,
-        summary: str,
-        location: str,
-        description: str,
-        start: Dict[str, str],
-        end: Dict[str, str],
-        reminders: Dict[str, Any],
-    ) -> str:
-        """Schedule a meeting in the calendar."""
-        try:
-            event_data = {
-                "summary": summary,
-                "location": location,
-                "description": description,
-                "start": start,
-                "end": end,
-                "reminders": reminders,
-            }
-            schedule_meeting(Event.model_validate(event_data))
-
-            return (
-                f"Event '{summary}' at '{location}' has been scheduled.\n"
-                f"Description: {description}\n"
-                f"Start: {start.get('dateTime', 'No Start Time')} "
-                f"({start.get('timeZone', 'No Timezone')})\n"
-                f"End: {end.get('dateTime', 'No End Time')} "
-                f"({end.get('timeZone', 'No Timezone')})\n"
-                f"Reminders: {reminders}"
-            )
-        except Exception as e:
-            print(f"Error in schedule_meeting: {e}")
-            return f"Error scheduling meeting: {str(e)}"
 
     def add_tool(self, tool_definition):
         self.tools.append(tool_definition)
@@ -153,6 +74,7 @@ class Agent:
             "1. If it mentions a meeting or sync (like 'sync with X', 'meet with Y', etc.), call schedule_meeting with appropriate details\n"
             "2. If it mentions tasks, follow-ups, or action items (like 'check with X', 'follow up on Y', etc.), call add_todo for EACH task\n"
             "Make sure to generate SEPARATE tool calls for EACH identified item. Don't combine multiple actions into one tool call.\n"
+            "call as many tools as possible.\n"
             f"Here's the transcript:\n\n{user_query}",
         )
 
@@ -183,15 +105,15 @@ class Agent:
         result = self.llm.bind_tools([schedule_meeting, add_todo]).invoke(
             [self.system_message, user_input]
         )
-        print("result", result)
 
         for tool_call in result.tool_calls:
-            print(tool_call)
-
-        # # Process the response to match the expected format
-        # response = {
-        #     "content": result.get("output", ""),
-        #     "tool_calls": [],  # LangChain handles tool calls internally
-        # }
+            if tool_call["name"] == "schedule_meeting":
+                print("Schedule Meeting:", tool_call["args"])
+                schedule_meeting.invoke(tool_call["args"])
+            elif tool_call["name"] == "add_todo":
+                print("Add Todo:", tool_call["args"])
+                add_todo.invoke(tool_call["args"])
+            else:
+                print(f"Unknown tool call: {tool_call.name}")
 
         return result

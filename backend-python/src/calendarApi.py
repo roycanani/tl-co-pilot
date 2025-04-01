@@ -14,25 +14,53 @@ SCOPES = ["https://www.googleapis.com/auth/calendar"]
 REDIRECT_URI = "http://localhost:8000/oauth2callback"
 
 
+class EventTime(BaseModel):
+    """Represents the start or end time of an event."""
+
+    dateTime: str
+    timeZone: str = "UTC"
+
+
+class EventReminders(BaseModel):
+    """Represents the reminders for an event."""
+
+    useDefault: bool = True
+
+
 class Event(BaseModel):
     """Represents an event in the Google Calendar."""
 
     summary: str
     location: str
     description: str
-    start: dict
-    end: dict
-    reminders: dict
+    start: EventTime
+    end: EventTime
+    reminders: EventReminders
 
 
-# @tool(name_or_callable="schedule_meeting", args_schema=Event.model_json_schema())
-@tool
-def schedule_meeting(event: Event) -> Dict[str, Any]:
+@tool(
+    name_or_callable="schedule_meeting",
+    args_schema=Event.model_json_schema(),
+    parse_docstring=True,
+)
+def schedule_meeting(
+    summary: str,
+    location: str,
+    description: str,
+    start: EventTime,
+    end: EventTime,
+    reminders: EventReminders,
+) -> Dict[str, Any]:
     """
     Creates a new event in the Google Calendar.
 
     Args:
-        event (Event): The event to be scheduled.
+        summary (str): The summary of the event.
+        location (str): The location of the event.
+        description (str): The description of the event.
+        start (EventTime): The start time of the event.
+        end (EventTime): The end time of the event.
+        reminders (EventReminders): The reminders for the event.
     """
     # Get user credentials through OAuth
     creds = get_credentials()
@@ -43,7 +71,16 @@ def schedule_meeting(event: Event) -> Dict[str, Any]:
         service = build("calendar", "v3", credentials=creds)
 
         # Convert Pydantic model to dictionary
-        event_dict = event.model_dump()
+        event_dict = Event.model_validate(
+            Event(
+                summary=summary,
+                location=location,
+                description=description,
+                start=start,
+                end=end,
+                reminders=reminders,
+            )
+        ).model_dump()
 
         # Insert the event into the calendar
         calendar_id = "primary"  # Uses the authenticated user's primary calendar
@@ -59,8 +96,19 @@ def schedule_meeting(event: Event) -> Dict[str, Any]:
         raise
 
 
-@tool
-def add_todo(task: str, due_date: Optional[str] = None) -> str:
+class TodoItem(BaseModel):
+    """Represents a to-do item."""
+
+    task: str
+    due_date: str
+
+
+@tool(
+    name_or_callable="add_todo",
+    args_schema=TodoItem.model_json_schema(),
+    parse_docstring=True,
+)
+def add_todo(task: str, due_date: str) -> str:
     """
     Add a to-do item to the task list.
 
