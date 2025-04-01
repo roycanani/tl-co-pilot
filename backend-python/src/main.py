@@ -65,9 +65,6 @@ async def process_transcript(request: TranscriptRequest):
 async def test_with_sample():
     response = agent.trigger(daily)
     return response
-    # return ProcessResponse(
-    #     content=response.get("content", ""), tool_calls=response.get("tool_calls", [])
-    # )
 
 
 @app.get("/authorize")
