@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 import secrets
 
+
 from auth import get_authorization_url, get_credentials_from_code, is_authorized
 
 # Create FastAPI app
@@ -28,126 +29,7 @@ app.add_middleware(
 app.add_middleware(SessionMiddleware, secret_key=secrets.token_urlsafe(32))
 
 # Initialize agent once to be reused across requests
-agent = Agent("llama3.2")
-
-# Add tools to the agent during initialization
-agent.add_tool(
-    {
-        "type": "function",
-        "function": {
-            "name": "add_task",
-            "description": "Add a to-do item to Google Tasks",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "title": {
-                        "type": "string",
-                        "description": "Title of the task",
-                    },
-                    "notes": {
-                        "type": "string",
-                        "description": "Additional notes for the task",
-                    },
-                    "due": {
-                        "type": "string",
-                        "description": "Due date for the task in ISO 8601 format (e.g., '2025-03-31T10:00:00Z')",
-                    },
-                },
-                "required": ["title", "notes", "due"],
-            },
-        },
-    }
-)
-
-agent.add_tool(
-    {
-        "type": "function",
-        "function": {
-            "name": "schedule_meeting",
-            "description": "Post an event to the calendar",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "summary": {
-                        "type": "string",
-                        "description": "The name or summary of the event",
-                    },
-                    "location": {
-                        "type": "string",
-                        "description": "The location of the event",
-                    },
-                    "description": {
-                        "type": "string",
-                        "description": "Details or description of the event",
-                    },
-                    "start": {
-                        "type": "object",
-                        "properties": {
-                            "dateTime": {
-                                "type": "string",
-                                "description": "Start time in ISO format",
-                            },
-                            "timeZone": {
-                                "type": "string",
-                                "description": "Timezone of the start time",
-                            },
-                        },
-                        "required": ["dateTime", "timeZone"],
-                    },
-                    "end": {
-                        "type": "object",
-                        "properties": {
-                            "dateTime": {
-                                "type": "string",
-                                "description": "End time in ISO format",
-                            },
-                            "timeZone": {
-                                "type": "string",
-                                "description": "Timezone of the end time",
-                            },
-                        },
-                        "required": ["dateTime", "timeZone"],
-                    },
-                    "reminders": {
-                        "type": "object",
-                        "properties": {
-                            "useDefault": {
-                                "type": "boolean",
-                                "description": "Whether to use default reminders",
-                            },
-                            "overrides": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "method": {
-                                            "type": "string",
-                                            "description": "Reminder method (e.g., email, popup)",
-                                        },
-                                        "minutes": {
-                                            "type": "integer",
-                                            "description": "Minutes before the event to trigger the reminder",
-                                        },
-                                    },
-                                    "required": ["method", "minutes"],
-                                },
-                            },
-                        },
-                        "required": ["useDefault"],
-                    },
-                },
-                "required": [
-                    "summary",
-                    "location",
-                    "description",
-                    "start",
-                    "end",
-                    "reminders",
-                ],
-            },
-        },
-    }
-)
+agent = Agent("qwen2.5")
 
 
 # Define request model
@@ -162,14 +44,11 @@ class ProcessResponse(BaseModel):
     tool_calls: Optional[List[Dict[str, Any]]] = None
 
 
-@app.post("/process", response_model=ProcessResponse)
+@app.post("/process")
 async def process_transcript(request: TranscriptRequest):
     try:
         response = agent.trigger(request.transcript)
-        return ProcessResponse(
-            content=response.get("content", ""),
-            tool_calls=response.get("tool_calls", []),
-        )
+        return response
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Error processing transcript: {str(e)}"
@@ -180,9 +59,7 @@ async def process_transcript(request: TranscriptRequest):
 @app.get("/test")
 async def test_with_sample():
     response = agent.trigger(daily)
-    return ProcessResponse(
-        content=response.get("content", ""), tool_calls=response.get("tool_calls", [])
-    )
+    return response
 
 
 @app.get("/authorize")
@@ -211,8 +88,6 @@ async def auth_status():
     """Check if user is authorized."""
     return {"authorized": is_authorized()}
 
-
-# ... [existing endpoints remain unchanged] ...
 
 if __name__ == "__main__":
     import uvicorn
