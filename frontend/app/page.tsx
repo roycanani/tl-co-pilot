@@ -23,7 +23,7 @@ interface UpcomingEvents {
   updated: string;
   status: string;
   due?: string;
-  webViewLink: string;
+  htmlLink: string;
   __v: number;
 }
 
@@ -347,7 +347,7 @@ export default async function DashboardPage() {
                             : "Upcoming"}
                         </Badge>
                         <Link
-                          href={event.webViewLink}
+                          href={event.htmlLink ?? ""}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
@@ -424,7 +424,7 @@ export default async function DashboardPage() {
                             : "Upcoming"}
                         </Badge>
                         <Link
-                          href={task.webViewLink}
+                          href={task.webViewLink ?? ""}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
