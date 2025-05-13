@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import fs from "fs/promises";
 import path from "path";
 import { writeFile } from "fs/promises";
+import { sendFileForTranscription } from "@/utils/rabbitmq";
 
 // Disable body parsing by Next.js (required for formidable)
 export const config = {
@@ -56,6 +57,8 @@ export async function POST(req: NextRequest) {
 
     // Clean up temporary file
     await fs.unlink(pathToFile);
+
+    sendFileForTranscription(`gs://tl-copilot-files/${uniqueFileName}`);
 
     return NextResponse.json({
       message: "File uploaded successfully",

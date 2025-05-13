@@ -41,26 +41,6 @@ class Agent:
 
         # TODO convert to LangGraph for multiagent (instead of deprecated initialize_agent)
 
-        # agent = create_tool_calling_agent(
-        #     llm=self.llm,
-        #     tools=self.langchain_tools,
-        #     # agent_type="zero-shot-react-description",
-        #     prompt=ChatPromptTemplate.from_messages(
-        #         [
-        #             ("system", self.system_message.content),
-        #             ("placeholder", "{chat_history}"),
-        #             ("human", "{input}"),
-        #             ("placeholder", "{agent_scratchpad}"),
-        #         ]
-        #     ),
-        # )
-        # agent_executor = AgentExecutor(
-        #     agent=agent,
-        #     tools=[schedule_meeting, add_todo],
-        #     verbose=True,
-        # )
-        # result = agent_executor.invoke({"input": user_input.content})
-
         # TODO Consider move to agent executor
         print(schedule_meeting.args)
         print(add_todo.args)
