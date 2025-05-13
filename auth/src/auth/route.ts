@@ -1,6 +1,7 @@
 import express from "express";
+import { Request, Response } from "express";
 const router = express.Router();
-import authController from "./controller";
+import authController, { authMiddleware } from "./controller";
 import passport from "passport";
 
 /**
@@ -191,5 +192,34 @@ router.get(
   }),
   authController.loginOIDC
 );
+
+// Add this new route to your existing router
+/**
+ * @swagger
+ * /auth/user-info:
+ *   get:
+ *     summary: Get authenticated user information
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User information retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 user:
+ *                   type: object
+ *       401:
+ *         description: No token provided
+ *       403:
+ *         description: Invalid or expired token
+ */
+router.get("/user-info", authMiddleware, authController.userInfo);
 
 export default router;

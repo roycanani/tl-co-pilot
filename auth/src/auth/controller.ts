@@ -151,6 +151,22 @@ const refresh = async (req: Request, res: Response) => {
   }
 };
 
+const userInfo = async (req: Request, res: Response) => {
+  try {
+    // Return user information from the decoded token
+    res.status(200).json({
+      status: "success",
+      user: req.user,
+    });
+  } catch (error) {
+    console.error("Error in user-info route:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Failed to retrieve user information",
+    });
+  }
+};
+
 type Payload = {
   _id: string;
 };
@@ -188,4 +204,5 @@ export default {
   refresh,
   logout,
   loginOIDC,
+  userInfo,
 };
