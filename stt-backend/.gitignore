@@ -4,3 +4,5 @@ __pycache__/
 src/credentials.json
 client_secret.json
 token.pickle
+
+credentials/**

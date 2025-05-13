@@ -11,6 +11,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import ProtectedRoute from "../../components/protected-route";
+import Swal from "sweetalert2";
 
 type UploadStatus = "idle" | "uploading" | "processing" | "success" | "error";
 
@@ -87,13 +88,22 @@ export default function UploadAudioPage() {
       }
 
       const data = await response.json();
+      console.log("Upload response:", data);
       setUploadStatus("processing");
 
-      // Simulate processing or redirect to action items page
-      setTimeout(() => {
-        setUploadStatus("success");
-        router.push(`/action-items/${data.fileId}`);
-      }, 2000);
+      Swal.fire({
+        title: "Processing Audio",
+        text: "Your audio file is being processed. Action items will be ready in a few minutes.",
+        icon: "success",
+        toast: true,
+        position: "bottom-end",
+        showConfirmButton: false,
+        timer: 10000,
+        timerProgressBar: true,
+      });
+
+      setUploadStatus("success");
+      router.push(`/dashboard`);
     } catch (error) {
       console.error("Upload error:", error);
       setErrorMessage("Failed to upload file");
