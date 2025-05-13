@@ -1,0 +1,129 @@
+/////// Posts ///////
+
+
+### Create Post
+POST http://localhost:4000/posts
+
+{
+  "title": "Hello", "senderId": "677ff5652758ff9eb4710a1c", "content": "Hello World!"
+}
+
+### Get All posts
+GET http://localhost:4000/posts
+
+### Get Posts By Sender
+GET http://localhost:4000/posts?sender=Uri
+
+### Get Post By Id
+GET http://localhost:4000/posts/677ec351d954efe3eefc4d21
+
+### Update Post
+PUT http://localhost:4000/posts/677ec351d954efe3eefc4d21
+
+{
+    "title": "Hello2"
+}
+
+### DELETE Post
+PUT http://localhost:4000/posts/677ec351d954efe3eefc4d21
+
+
+/////// Comments ///////
+
+### Create Comment
+POST http://localhost:4000/comments
+
+{
+  "postId": "677ec408d954efe3eefc4d2a", 
+  "sender": "Uri",
+  "content": "Hello World!"
+}
+
+### Get All Comments
+GET http://localhost:4000/comments
+
+### Get All Comments By PostId 
+GET http://localhost:4000/comments?postId=
+
+### Get Comment By Id
+GET http://localhost:4000/comments/
+
+### Update Comment
+PUT http://localhost:4000/comments/677ec432d954efe3eefc4d2e
+
+{
+  "content": "Hello World2!"
+}
+
+### Delete Comment
+DELETE http://localhost:4000/comments/677ec432d954efe3eefc4d2e
+
+
+/////// Users ///////
+
+### Register
+POST http://localhost:4000/auth/register
+Content-Type: application/json
+
+{
+  "userName": "sagsagsag",
+  "email": "sagsagsag@gmail.com",
+  "password": "123123123"
+}
+
+### Login User
+POST http://localhost:4000/auth/login
+Content-Type: application/json
+
+{
+  "email": "sagsagsag@gmail.com",
+  "password": "123123123"
+}
+
+### Get All Users
+GET http://localhost:4000/users
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2Q2ODFjNDk1MjYwOWVjZGNiMTRkODUiLCJyYW5kb20iOiIwLjgwNzQ1NjM1NzYwNTg2OTMiLCJpYXQiOjE3NDIxMjgwODEsImV4cCI6MTc0MjczMjg4MX0.HP4GHpR1rKfNrSy42Y4Ky8ByD5f0jA-74i5kB6_7ZmM
+
+/////// Chats ///////
+
+### Get All Chats
+GET http://localhost:4000/chats
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2Q2ODFjNDk1MjYwOWVjZGNiMTRkODUiLCJyYW5kb20iOiIwLjgwNzQ1NjM1NzYwNTg2OTMiLCJpYXQiOjE3NDIxMjgwODEsImV4cCI6MTc0MjczMjg4MX0.HP4GHpR1rKfNrSy42Y4Ky8ByD5f0jA-74i5kB6_7ZmM
+
+### Get Chat By ID
+GET http://localhost:4000/chats/67d71e67198d65dbe93c1748
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2Q2ODFjNDk1MjYwOWVjZGNiMTRkODUiLCJyYW5kb20iOiIwLjgwNzQ1NjM1NzYwNTg2OTMiLCJpYXQiOjE3NDIxMjgwODEsImV4cCI6MTc0MjczMjg4MX0.HP4GHpR1rKfNrSy42Y4Ky8ByD5f0jA-74i5kB6_7ZmM
+
+### Create Chat
+POST http://localhost:4000/chats
+Content-Type: application/json
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2Q2ODFjNDk1MjYwOWVjZGNiMTRkODUiLCJyYW5kb20iOiIwLjgwNzQ1NjM1NzYwNTg2OTMiLCJpYXQiOjE3NDIxMjgwODEsImV4cCI6MTc0MjczMjg4MX0.HP4GHpR1rKfNrSy42Y4Ky8ByD5f0jA-74i5kB6_7ZmM
+
+{
+  "users": ["67d681c4952609ecdcb14d85", "679220de322934e02cb0f9cc"]
+}
+
+/////// Messages ///////
+
+### Get All Messages
+GET http://localhost:4000/messages
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2Q2ODFjNDk1MjYwOWVjZGNiMTRkODUiLCJyYW5kb20iOiIwLjgwNzQ1NjM1NzYwNTg2OTMiLCJpYXQiOjE3NDIxMjgwODEsImV4cCI6MTc0MjczMjg4MX0.HP4GHpR1rKfNrSy42Y4Ky8ByD5f0jA-74i5kB6_7ZmM
+
+### Get Message By ID
+GET http://localhost:4000/messages/67d71e67198d65dbe93c1748
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2Q2ODFjNDk1MjYwOWVjZGNiMTRkODUiLCJyYW5kb20iOiIwLjgwNzQ1NjM1NzYwNTg2OTMiLCJpYXQiOjE3NDIxMjgwODEsImV4cCI6MTc0MjczMjg4MX0.HP4GHpR1rKfNrSy42Y4Ky8ByD5f0jA-74i5kB6_7ZmM
+
+### Create Message
+POST http://localhost:4000/messages
+Content-Type: application/json
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2Q2ODFjNDk1MjYwOWVjZGNiMTRkODUiLCJyYW5kb20iOiIwLjgwNzQ1NjM1NzYwNTg2OTMiLCJpYXQiOjE3NDIxMjgwODEsImV4cCI6MTc0MjczMjg4MX0.HP4GHpR1rKfNrSy42Y4Ky8ByD5f0jA-74i5kB6_7ZmM
+
+{
+  "chat": "67d71e67198d65dbe93c1748",
+  "sender": "679220de322934e02cb0f9cc",
+  "content": "Hello World !!!!!!"
+}
+
+### Get Messages for a Chat
+GET http://localhost:4000/chats/67d71e67198d65dbe93c1748/messages
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2Q2ODFjNDk1MjYwOWVjZGNiMTRkODUiLCJyYW5kb20iOiIwLjgwNzQ1NjM1NzYwNTg2OTMiLCJpYXQiOjE3NDIxMjgwODEsImV4cCI6MTc0MjczMjg4MX0.HP4GHpR1rKfNrSy42Y4Ky8ByD5f0jA-74i5kB6_7ZmM
