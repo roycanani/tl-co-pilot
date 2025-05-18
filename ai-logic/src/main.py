@@ -1,6 +1,8 @@
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
+
+from config import settings
 from agent import Agent
 from daily import daily  # Keep this for testing if needed
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,7 +10,9 @@ from starlette.middleware.sessions import SessionMiddleware
 import secrets
 
 
-from auth import get_authorization_url, get_credentials_from_code, is_authorized
+from auth import (
+    get_credentials,
+)
 
 # Create FastAPI app
 app = FastAPI(
@@ -29,13 +33,14 @@ app.add_middleware(
 app.add_middleware(SessionMiddleware, secret_key=secrets.token_urlsafe(32))
 
 # Initialize agent once to be reused across requests
-agent = Agent("qwen2.5")
+agent = Agent("llama3.1")
 
 
 # Define request model
 class TranscriptRequest(BaseModel):
     transcript: str
     options: Optional[Dict[str, Any]] = None
+    user_id: str
 
 
 # Define response model
@@ -45,11 +50,18 @@ class ProcessResponse(BaseModel):
 
 
 @app.post("/process")
-async def process_transcript(request: TranscriptRequest):
+async def process_transcript(request: TranscriptRequest) -> str:
     try:
-        response = agent.trigger(request.transcript)
+        print("Recived message for user: ", request.user_id)
+        credentials = get_credentials(request.user_id)
+        response = agent.trigger(request.transcript, credentials)
+        print("Response from agent:", response)
         return response
+    except HTTPException as e:
+        print(f"HTTPException: {e.detail}")
+        raise e
     except Exception as e:
+        print(f"Error processing transcript: {str(e)}")
         raise HTTPException(
             status_code=500, detail=f"Error processing transcript: {str(e)}"
         )
@@ -81,12 +93,6 @@ async def oauth2callback(request: Request, code: str, state: Optional[str] = Non
         return {"message": "Authentication successful! You can close this window."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Authentication error: {str(e)}")
-
-
-@app.get("/auth/status")
-async def auth_status():
-    """Check if user is authorized."""
-    return {"authorized": is_authorized()}
 
 
 if __name__ == "__main__":

@@ -177,4 +177,42 @@ usersRouter.delete(
   usersController.delete.bind(usersController)
 );
 
+/**
+ * @swagger
+ * /users/{id}/token:
+ *   get:
+ *     summary: Get user token by ID (Internal Use)
+ *     tags: [Users]
+ *     description: Generates a token for the specified user ID, intended for internal service consumption. The generated token is also stored locally by the server.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The user ID
+ *     responses:
+ *       200:
+ *         description: User token generated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                   description: The access token for the user
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Token generation or storage failed
+ *     security:
+ *       - bearerAuth: []
+ */
+usersRouter.get(
+  "/:id/token",
+  // authMiddleware, // TODO - Add a specific middleware for this route if needed (for intenral services usage)
+  usersController.getUserToken.bind(usersController) // Assumes a new method in usersController
+);
+
 export default usersRouter;

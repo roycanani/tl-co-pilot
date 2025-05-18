@@ -5,6 +5,7 @@ const AUDIO_FILES_QUEUE = process.env.AUDIO_FILES_QUEUE || "audio_files";
 
 interface MessagePayload {
   file: string;
+  user_id: string;
 }
 
 async function connectRabbitMQ(): Promise<{
@@ -30,7 +31,8 @@ async function connectRabbitMQ(): Promise<{
 }
 
 export async function sendFileForTranscription(
-  filePath: string
+  filePath: string,
+  userId: string
 ): Promise<boolean> {
   const connectionDetails = await connectRabbitMQ();
 
@@ -42,7 +44,7 @@ export async function sendFileForTranscription(
   const { connection, channel } = connectionDetails;
 
   try {
-    const message: MessagePayload = { file: filePath };
+    const message: MessagePayload = { file: filePath, user_id: userId };
     const messageBuffer = Buffer.from(JSON.stringify(message));
 
     channel.sendToQueue(AUDIO_FILES_QUEUE, messageBuffer);

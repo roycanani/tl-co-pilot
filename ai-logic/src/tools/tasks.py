@@ -1,4 +1,5 @@
 from googleapiclient.discovery import build
+from google.oauth2.credentials import Credentials
 from googleapiclient.errors import HttpError
 from pydantic import BaseModel, Field
 from typing import Dict, Any
@@ -27,7 +28,9 @@ class Task(BaseModel):
     args_schema=Task.model_json_schema(),
     parse_docstring=True,
 )
-def add_todo(title: str, notes: str, due: str) -> Dict[str, Any]:
+def add_todo(
+    title: str, notes: str, due: str, credentials: Credentials
+) -> Dict[str, Any]:
     """
     Creates a new task in Google Tasks.
 
@@ -37,11 +40,8 @@ def add_todo(title: str, notes: str, due: str) -> Dict[str, Any]:
         due (str): The due date and time of the task in ISO 8601 format (e.g., "2025-03-31T10:00:00Z").
     """
     # Get user credentials through OAuth
-    creds = get_credentials()
-    if not creds:
-        raise Exception("Not authorized. User must complete OAuth flow first.")
-
     # TODO - remove this after fix llm hilosinations
+    print("creating task with credentials:", credentials)
     if isinstance(due, dict):
         if "dateTime" in due:
             due = due["dateTime"]
@@ -49,8 +49,17 @@ def add_todo(title: str, notes: str, due: str) -> Dict[str, Any]:
             due = due["date"] + "T00:00:00Z"
 
     try:
-        service = build("tasks", "v1", credentials=creds)
+        print("Adding task to Google Tasks...")
+        print(f"  Credentials valid: {credentials.valid}")
+        print(f"  Credentials expired: {credentials.expired}")
+        print(f"  Credentials scopes: {credentials.scopes}")
+        service = build(
+            "tasks",
+            "v1",
+            credentials=credentials,
+        )
 
+        print("Service created successfully.")
         # Convert Pydantic model to dictionary
         task_dict = Task(
             title=title,
@@ -65,6 +74,7 @@ def add_todo(title: str, notes: str, due: str) -> Dict[str, Any]:
         created_task = (
             service.tasks().insert(tasklist=tasklist_id, body=task_dict).execute()
         )
+        print("Task created successfully.")
 
         requests.post(
             "http://localhost:3000/tasks",

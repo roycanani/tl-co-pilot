@@ -8,6 +8,8 @@ export interface User {
   phone_number?: string | null;
   image: string;
   refreshToken?: string[];
+  accessToken?: string;
+  refreshedToken?: string;
 }
 
 const userSchema = new Schema<User>({
@@ -37,6 +39,14 @@ const userSchema = new Schema<User>({
   refreshToken: {
     type: [String],
     default: [],
+  },
+  accessToken: {
+    type: String,
+    default: "",
+  },
+  refreshedToken: {
+    type: String,
+    default: "",
   },
 });
 

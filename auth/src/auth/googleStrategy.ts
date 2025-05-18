@@ -1,6 +1,7 @@
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import passport from "passport";
-import { User, userModel } from "../users/model"; // Adjust the path to your User model
+import { User, userModel } from "../users/model";
+import { redisClient } from "../common/redis";
 
 // Debug output to verify environment variables
 console.log("Google OAuth Config:");
@@ -25,23 +26,52 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        const user = await userModel.findOne({ email: profile._json.email });
+        let user = await userModel.findOne({ email: profile._json.email });
 
         if (!user) {
           console.log("user creatin", profile._json);
-          const createdUser = await userModel.create({
+          user = await userModel.create({
             userName: profile._json.email,
             email: profile._json.email,
             image: profile._json.picture,
+            accessToken: accessToken,
+            refreshedToken: refreshToken,
           });
-          done(null, createdUser);
         } else {
-          console.log("User found", user);
-          const updatedUser = await userModel.findOne({
-            email: profile._json.email,
-          });
-          done(null, updatedUser!);
+          console.log("User found", user._id);
+          user = await userModel.findOneAndUpdate(
+            {
+              email: profile._json.email,
+            },
+            {
+              accessToken: accessToken,
+              refreshedToken: refreshToken,
+            }
+          );
         }
+        if (!user) {
+          done(new Error("User not found"), undefined);
+          return;
+        }
+        try {
+          const redisKey = `user_id:${user._id}`;
+          await redisClient.set(
+            redisKey,
+            JSON.stringify({
+              accessToken: accessToken,
+              refreshToken: refreshToken,
+            }),
+            "EX",
+            60 * 60
+          );
+          console.log(
+            `Access token for user ${user._id} stored in Redis with key ${redisKey}.`
+          );
+        } catch (redisError) {
+          console.error("Error storing token in Redis:", redisError);
+          return;
+        }
+        done(null, user);
       } catch (err) {
         done(err, undefined);
       }

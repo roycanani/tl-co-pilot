@@ -28,7 +28,7 @@ class Agent:
 
         self.messages = [self.system_message]
 
-    def trigger(self, user_query):
+    def trigger(self, user_query, credentials):
         # Format the user input with instructions
         user_input = HumanMessage(
             "Analyze this meeting transcript and identify ALL actionable items. For EACH item:\n"
@@ -38,12 +38,11 @@ class Agent:
             "call as many tools as possible.\n"
             f"Here's the transcript:\n\n{user_query}",
         )
+        print("triggered with user input:", user_query)
 
         # TODO convert to LangGraph for multiagent (instead of deprecated initialize_agent)
 
         # TODO Consider move to agent executor
-        print(schedule_meeting.args)
-        print(add_todo.args)
         result = self.llm.bind_tools([schedule_meeting, add_todo]).invoke(
             [self.system_message, user_input]
         )
@@ -51,11 +50,13 @@ class Agent:
         for tool_call in result.tool_calls:
             if tool_call["name"] == "schedule_meeting":
                 print("Schedule Meeting:", tool_call["args"])
+                tool_call["args"]["credentials"] = credentials
                 schedule_meeting.invoke(tool_call["args"])
             elif tool_call["name"] == "add_todo":
                 print("Add Todo:", tool_call["args"])
+                tool_call["args"]["credentials"] = credentials
                 add_todo.invoke(tool_call["args"])
             else:
                 print(f"Unknown tool call: {tool_call.name}")
 
-        return result
+        return "success_to_process"

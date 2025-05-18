@@ -12,6 +12,7 @@ import "./auth/googleStrategy";
 import cors from "cors";
 import http from "http";
 import https from "https";
+import usersRouter from "./users/route";
 
 const app = express();
 const corsOptions = {
@@ -39,6 +40,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(passport.initialize());
 app.use("/auth", authRouter);
+app.use("/users", usersRouter);
 app.use(express.static("public"));
 
 app.enable("trust proxy");
