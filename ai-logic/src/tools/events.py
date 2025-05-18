@@ -49,6 +49,7 @@ class Event(BaseModel):
     parse_docstring=True,
 )
 def schedule_meeting(
+    credentials: str,
     summary: str,
     location: str,
     description: str,
@@ -68,12 +69,8 @@ def schedule_meeting(
         reminders (dict): The reminders for the event, defaults to using default reminders.
     """
     # Get user credentials through OAuth
-    creds = get_credentials()
-    if not creds:
-        raise Exception("Not authorized. User must complete OAuth flow first.")
-
     try:
-        service = build("calendar", "v3", credentials=creds)
+        service = build("calendar", "v3", credentials=credentials)
 
         # Convert Pydantic model to dictionary
         event_dict = Event.model_validate(

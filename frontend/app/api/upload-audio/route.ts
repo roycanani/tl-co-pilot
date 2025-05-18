@@ -26,6 +26,8 @@ export async function POST(req: NextRequest) {
     console.log("Received request to upload file");
 
     const formData = await req.formData();
+    console.log("Form data received:", formData);
+    const userId = formData.get("userId") as string;
 
     const file: File = formData.get("file") as File;
     if (!file) {
@@ -58,7 +60,7 @@ export async function POST(req: NextRequest) {
     // Clean up temporary file
     await fs.unlink(pathToFile);
 
-    sendFileForTranscription(`gs://tl-copilot-files/${uniqueFileName}`);
+    sendFileForTranscription(`gs://tl-copilot-files/${uniqueFileName}`, userId);
 
     return NextResponse.json({
       message: "File uploaded successfully",

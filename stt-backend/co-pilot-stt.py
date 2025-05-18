@@ -38,7 +38,7 @@ def connect_rabbitmq():
             time.sleep(5)
 
 
-def mp3_to_text(gcs_uri, channel):  # Changed mp3_path to gcs_uri
+def mp3_to_text(gcs_uri, channel, user_id):  # Changed mp3_path to gcs_uri
     logging.info(f"Processing file from GCS: {gcs_uri}")
 
     # Initialize GCS client
@@ -113,7 +113,7 @@ def mp3_to_text(gcs_uri, channel):  # Changed mp3_path to gcs_uri
 
     # Publish the text to RabbitMQ
     message = json.dumps(
-        {"file": gcs_uri, "transcription": text}
+        {"file": gcs_uri, "transcription": text, "user_id": user_id}
     )  # Use gcs_uri in the message
     channel.basic_publish(exchange="", routing_key=TRANSCRIPTIONS_QUEUE, body=message)
 
@@ -124,8 +124,9 @@ def callback(ch, method, properties, body):
     message = json.loads(body)
     logging.info(f"Received message: {message}")
     file_path = message.get("file")
+    user_id = message.get("user_id")
     if file_path:
-        transcription = mp3_to_text(file_path, ch)
+        transcription = mp3_to_text(file_path, ch, user_id)
         logging.info(f"Processed file: {file_path}\nTranscription: {transcription}")
 
 

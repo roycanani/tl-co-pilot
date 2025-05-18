@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../../context/auth-context";
 import {
   Loader2,
   Upload,
@@ -12,11 +11,12 @@ import {
 } from "lucide-react";
 import ProtectedRoute from "../../components/protected-route";
 import Swal from "sweetalert2";
+import { useAuth } from "../../context/auth-context";
 
 type UploadStatus = "idle" | "uploading" | "processing" | "success" | "error";
 
 export default function UploadAudioPage() {
-  const { getToken } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -57,6 +57,10 @@ export default function UploadAudioPage() {
     }
   };
 
+  useEffect(() => {
+    console.log("user", user);
+  });
+
   // Trigger file input click
   const triggerFileInput = () => {
     fileInputRef.current?.click();
@@ -73,6 +77,10 @@ export default function UploadAudioPage() {
     const formData = new FormData();
     formData.append("file", selectedFile);
     formData.append("fileName", selectedFile.name);
+    formData.append("userId", user?._id || "");
+
+    console.log("user id", user?._id);
+    console.log("user", user);
 
     try {
       const response = await fetch("/api/upload-audio", {
@@ -90,20 +98,21 @@ export default function UploadAudioPage() {
       const data = await response.json();
       console.log("Upload response:", data);
       setUploadStatus("processing");
-
-      Swal.fire({
-        title: "Processing Audio",
-        text: "Your audio file is being processed. Action items will be ready in a few minutes.",
-        icon: "success",
-        toast: true,
-        position: "bottom-end",
-        showConfirmButton: false,
-        timer: 10000,
-        timerProgressBar: true,
-      });
-
       setUploadStatus("success");
-      router.push(`/dashboard`);
+
+      setTimeout(() => {
+        Swal.fire({
+          title: "Processing Audio",
+          text: "Your audio file is being processed. Action items will be ready in a few minutes.",
+          icon: "success",
+          toast: true,
+          position: "bottom-end",
+          showConfirmButton: false,
+          timer: 10000,
+          timerProgressBar: true,
+        });
+        router.push(`/dashboard`);
+      }, 5000);
     } catch (error) {
       console.error("Upload error:", error);
       setErrorMessage("Failed to upload file");
@@ -194,7 +203,7 @@ export default function UploadAudioPage() {
                 <CheckCircle className="mx-auto mb-2 h-10 w-10 text-green-500" />
                 <p className="text-lg font-medium">Upload successful!</p>
                 <p className="text-sm text-gray-500">
-                  Redirecting to action items...
+                  Redirecting to dashboard...
                 </p>
               </div>
             )}

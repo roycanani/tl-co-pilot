@@ -10,7 +10,7 @@ import {
 
 // Define the User type
 export interface User {
-  id?: string;
+  _id?: string;
   name?: string;
   email?: string;
   avatar?: string;
@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch (error) {
           console.error("Failed to fetch user data:", error);
           // Keep the token but set a minimal user object
-          setUser({ id: "unknown" });
+          setUser({ _id: "unknown" });
           setIsAuthenticated(true);
         }
       } finally {

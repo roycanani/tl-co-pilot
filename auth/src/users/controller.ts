@@ -1,4 +1,5 @@
 import BaseController from "../common/base_controller";
+import { redisClient } from "../common/redis";
 import { deleteFile, uploadFile } from "../common/storage";
 import { User, userModel } from "./model";
 import { Request, Response } from "express";
@@ -30,6 +31,31 @@ class UsersController extends BaseController<User> {
     }
 
     await super.update(req, res);
+  }
+
+  async getUserToken(req: Request, res: Response) {
+    try {
+      const userId = req.params.id;
+
+      if (!userId) {
+        res.status(400).json({ message: "User ID must be provided." });
+        return;
+      }
+      const tokenKey = `user_id:${userId}`;
+
+      const tokens = await redisClient.get(tokenKey);
+
+      if (tokens) {
+        res.status(200).json(JSON.parse(tokens));
+      } else {
+        res
+          .status(404)
+          .json({ message: "Access token not found for this user." });
+      }
+    } catch (error) {
+      console.error("Error retrieving access token:", error);
+      res.status(500).json({ message: "Internal server error." });
+    }
   }
 }
 
