@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "../context/auth-context";
-import { FileAudio, LogOut, User, List } from "lucide-react";
+import { FileAudio, LogOut, User, List, FileText } from "lucide-react";
 
 export default function NavBar() {
   const { user, logout, isAuthenticated } = useAuth();
@@ -21,6 +21,11 @@ export default function NavBar() {
       href: "/upload-audio",
       label: "Upload Audio",
       icon: <FileAudio className="h-5 w-5" />,
+    },
+    {
+      href: "/upload-transcription",
+      label: "Upload Transcription",
+      icon: <FileText className="h-5 w-5" />,
     },
     // Add other navigation items as needed
   ];

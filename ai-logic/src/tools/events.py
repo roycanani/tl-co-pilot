@@ -1,4 +1,5 @@
 from googleapiclient.discovery import build
+from google.oauth2.credentials import Credentials
 from googleapiclient.errors import HttpError
 from pydantic import BaseModel, Field
 from typing import Dict, Any
@@ -49,7 +50,7 @@ class Event(BaseModel):
     parse_docstring=True,
 )
 def schedule_meeting(
-    credentials: str,
+    credentials: Credentials,
     summary: str,
     location: str,
     description: str,

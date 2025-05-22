@@ -33,7 +33,7 @@ app.add_middleware(
 app.add_middleware(SessionMiddleware, secret_key=secrets.token_urlsafe(32))
 
 # Initialize agent once to be reused across requests
-agent = Agent("llama3.1")
+agent = Agent("qwen3:14b")
 
 
 # Define request model

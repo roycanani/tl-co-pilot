@@ -41,7 +41,6 @@ def add_todo(
     """
     # Get user credentials through OAuth
     # TODO - remove this after fix llm hilosinations
-    print("creating task with credentials:", credentials)
     if isinstance(due, dict):
         if "dateTime" in due:
             due = due["dateTime"]
@@ -49,10 +48,6 @@ def add_todo(
             due = due["date"] + "T00:00:00Z"
 
     try:
-        print("Adding task to Google Tasks...")
-        print(f"  Credentials valid: {credentials.valid}")
-        print(f"  Credentials expired: {credentials.expired}")
-        print(f"  Credentials scopes: {credentials.scopes}")
         service = build(
             "tasks",
             "v1",
@@ -60,7 +55,6 @@ def add_todo(
         )
 
         print("Service created successfully.")
-        # Convert Pydantic model to dictionary
         task_dict = Task(
             title=title,
             notes=notes,
@@ -69,7 +63,6 @@ def add_todo(
 
         print(task_dict)
 
-        # Insert the task into the default task list
         tasklist_id = "@default"  # Uses the authenticated user's default task list
         created_task = (
             service.tasks().insert(tasklist=tasklist_id, body=task_dict).execute()
