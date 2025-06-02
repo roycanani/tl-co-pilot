@@ -7,12 +7,21 @@ from langchain_core.messages import (
 
 from tools.events import schedule_meeting
 from tools.tasks import add_todo
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 
 class Agent:
     def __init__(self, model):
         self.model_name = model
-        self.llm = ChatOllama(model=model, temperature=0.0)
+        # self.llm = ChatOllama(model=model, temperature=0.0) For local run
+        self.llm = ChatGoogleGenerativeAI(
+            model="gemini-2.5-flash-preview-05-20",
+            temperature=0,
+            max_tokens=None,
+            timeout=None,
+            max_retries=2,
+            # other params...
+        )
         self.tools = []
         self.langchain_tools = []
         current_date = datetime.now().strftime("%Y-%m-%d")

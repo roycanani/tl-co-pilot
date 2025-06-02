@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "nodemon ./src/app.ts",
     "start": "node ./dist/app.js",
+    "build": "tsc",
     "lint": "eslint . --ext .ts",
     "test": "jest --coverage --detectOpenHandles --forceExit"
   },

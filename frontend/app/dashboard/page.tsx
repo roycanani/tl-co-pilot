@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { CalendarClock, CheckCircle2, Clock, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
@@ -72,12 +74,33 @@ function isToday(dateString: string) {
 }
 
 export default async function DashboardPage() {
-  const upcomingEvents: UpcomingEvents[] = await (
-    await fetch("http://localhost:3000/events")
-  ).json();
-  const tasksToBeDone: TasksToBeDone[] = await (
-    await fetch("http://localhost:3000/tasks")
-  ).json();
+  let upcomingEvents: UpcomingEvents[] = [];
+  let tasksToBeDone: TasksToBeDone[] = [];
+  process.stdout.write(`Upcoming Events:\n`);
+  console.log("Upcoming Tasks:");
+
+  // Fetch upcoming events and tasks from the API
+  try {
+    const response = await fetch("http://storage:3000/events");
+    if (!response.ok) {
+      throw new Error("Failed to fetch events");
+    }
+    upcomingEvents = await response.json();
+    console.log(`Upcoming Events: ${JSON.stringify(upcomingEvents)}\n`);
+  } catch (error) {
+    console.error("Error fetching events:", error);
+  }
+
+  try {
+    const response = await fetch("http://storage:3000/tasks");
+    if (!response.ok) {
+      throw new Error("Failed to fetch tasks");
+    }
+    tasksToBeDone = await response.json();
+    console.log("Upcoming Tasks:", tasksToBeDone);
+  } catch (error) {
+    console.error("Error fetching tasks:", error);
+  }
 
   return (
     <div className="container mx-auto py-6">

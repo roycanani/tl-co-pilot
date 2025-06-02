@@ -1,0 +1,142 @@
+services:
+  auth:
+    build:
+      context: ./auth
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./auth/.env
+    depends_on:
+      - mongo
+      - redis
+    restart: unless-stopped
+
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ollama_data:/root/.ollama
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:11434/api/version"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: "5.0"
+  #         memory: 8G
+
+  ai-logic:
+    build:
+      context: ./ai-logic
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./ai-logic/.env
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    depends_on:
+      - mongo
+      - redis
+      - auth
+      # - ollama
+      - storage
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "80:3000"
+    env_file:
+      - ./frontend/.env
+    environment:
+      - NODE_ENV=production
+      - NEXT_RUNTIME_LOG_LEVEL=info
+    tty: true
+    stdin_open: true
+    volumes:
+      - ./frontend/credentials:/app/credentials
+    depends_on:
+      - auth
+      - ai-logic
+      - storage
+    restart: unless-stopped
+
+  storage:
+    build:
+      context: ./storage
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./storage/.env
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+  stt:
+    build:
+      context: ./stt-backend/stt
+    env_file:
+      - ./stt-backend/stt/.env
+    volumes:
+      - ./stt-backend/stt/credentials:/app/credentials
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials/tl-co-pilot-3a62c5c8a92a.json
+    depends_on:
+      - mongo
+      - redis
+    restart: unless-stopped
+
+  ai-producer:
+    build:
+      context: ./stt-backend/ai-producer
+    env_file:
+      - ./stt-backend/ai-producer/.env
+    volumes:
+      - ./stt-backend/stt/credentials:/app/credentials
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials/tl-co-pilot-3a62c5c8a92a.json
+    depends_on:
+      - mongo
+      - redis
+      - stt
+    restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 256M
+
+volumes:
+  mongo_data:
+  redis_data:
+  storage_data:
+  ollama_data:
+
+networks:
+  default:
+    driver: bridge

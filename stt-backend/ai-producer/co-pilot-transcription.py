@@ -41,7 +41,7 @@ def callback(ch, method, properties, body):
     if transcription:
         print(user_id)
         requests.post(
-            "http://localhost:8000/process",
+            "http://ai-logic:8000/process",
             json={"transcript": transcription, "user_id": user_id},
         )
         # transcription = mp3_to_text(file_path, ch)

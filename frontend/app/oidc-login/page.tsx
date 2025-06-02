@@ -7,7 +7,6 @@ import { Loader2 } from "lucide-react";
 export default function OIDCLoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Get accessToken directly from URL query parameter
@@ -35,12 +34,6 @@ export default function OIDCLoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
       <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-lg">
         <h1 className="mb-6 text-center text-2xl font-bold">Sign In</h1>
-
-        {error && (
-          <div className="mb-4 rounded bg-red-50 p-3 text-red-700">
-            <p>{error}</p>
-          </div>
-        )}
 
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-8">
