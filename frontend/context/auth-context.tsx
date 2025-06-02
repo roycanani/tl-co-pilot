@@ -1,5 +1,6 @@
 "use client";
 
+import { parseJwt } from "@/lib/utils";
 import {
   createContext,
   useContext,
@@ -25,6 +26,7 @@ interface AuthContextType {
   login: () => void;
   logout: () => void;
   getToken: () => string | null;
+  setToken: (token: string | null) => void;
 }
 
 // Create the context
@@ -99,6 +101,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return localStorage.getItem("accessToken");
   };
 
+  const setToken = (token: string | null) => {
+    localStorage.setItem("accessToken", token || "");
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -108,6 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         logout,
         getToken,
+        setToken,
       }}
     >
       {children}
@@ -125,3 +132,11 @@ export function useAuth() {
 
   return context;
 }
+
+// export const useAuthDispatch = () => {
+//   const context = useContext(AuthDispatchContext);
+//   if (context === null) {
+//     throw new Error("useAuthDispatch must be used within an AuthProvider");
+//   }
+//   return context;
+// };

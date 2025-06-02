@@ -8,14 +8,13 @@ CLIENT_ID = settings.google_client_id
 CLIENT_SECRET = settings.google_client_secret
 CLIENT_SECRETS_FILE = "client_secret.json"  # Path to OAuth client secrets JSON
 TOKEN_FILE = "token.pickle"  # Path to store user tokens
-REDIRECT_URI = "http://localhost:8000/oauth2callback"
 TOKEN_URI = "https://oauth2.googleapis.com/token"
 
 
 def get_credentials(user_id: str) -> Optional[Credentials]:
     """Get valid user credentials from storage or return None."""
     print("Getting credentials for user:", user_id)
-    data = requests.get(f"http://localhost:4000/users/{user_id}/token")
+    data = requests.get(f"http://auth:4000/users/{user_id}/token")
     if data.status_code == 200:
         print("Credentials fetched successfully.")
         access_token = data.json().get("accessToken")

@@ -92,7 +92,7 @@ def schedule_meeting(
         )
 
         requests.post(
-            "http://localhost:3000/events",
+            "http://storage:3000/events",
             headers={
                 "accept": "application/json, text/plain, */*",
             },

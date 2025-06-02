@@ -10,6 +10,12 @@ import eventsRouter from "./events/route";
 import tasksRouter from "./tasks/route";
 
 const app = express();
+
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next(); // Pass control to the next middleware or route handler
+});
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/posts", postsRouter);

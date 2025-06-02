@@ -69,14 +69,16 @@ def add_todo(
         )
         print("Task created successfully.")
 
-        requests.post(
-            "http://localhost:3000/tasks",
+        response = requests.post(
+            "http://storage:3000/tasks",
             headers={
                 "accept": "application/json, text/plain, */*",
             },
             json=created_task,
             verify=False,
         )
+
+        print(f"Response from storage service: {response.status_code} - {response.text}")
 
         print(f"Task created: {created_task}")
         return created_task

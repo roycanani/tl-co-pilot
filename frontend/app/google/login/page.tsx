@@ -2,12 +2,13 @@
 
 import React, { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useAuthDispatch } from "../auth.context";
+// import { useAuthDispatch } from "../../../context/auth-context";
+import { useAuth } from "../../../context/auth-context";
 
 const GoogleLogin: React.FC = () => {
   const router = useRouter();
   const pathName = usePathname();
-  const { setToken } = useAuthDispatch();
+  const { setToken } = useAuth();
 
   useEffect(() => {
     const searchParams = new URLSearchParams(pathName);
