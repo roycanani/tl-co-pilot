@@ -15,6 +15,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+interface UpcomingEvents {
+  dateTime: string;
+  timeZone: string;
+}
+
 // Mock data for events
 interface UpcomingEvents {
   _id: {
@@ -24,7 +29,8 @@ interface UpcomingEvents {
   description: string;
   updated: string;
   status: string;
-  due?: string;
+  start: UpcomingEvents;
+  end: UpcomingEvents;
   htmlLink: string;
   __v: number;
 }
@@ -86,7 +92,7 @@ export default async function DashboardPage() {
       throw new Error("Failed to fetch events");
     }
     upcomingEvents = await response.json();
-    console.log(`Upcoming Events: ${JSON.stringify(upcomingEvents)}\n`);
+    console.log(`Upcoming Events: ${upcomingEvents}\n`);
   } catch (error) {
     console.error("Error fetching events:", error);
   }
@@ -135,7 +141,8 @@ export default async function DashboardPage() {
                   <p className="text-xs text-muted-foreground">
                     {
                       upcomingEvents.filter(
-                        (event) => event.due && isToday(event.due)
+                        (event) =>
+                          event.start.dateTime && isToday(event.start.dateTime)
                       ).length
                     }{" "}
                     today
@@ -216,29 +223,34 @@ export default async function DashboardPage() {
                               <Clock className="h-3.5 w-3.5" />
                               <span
                                 className={
-                                  event.due && isOverdue(event.due)
+                                  event.start.dateTime &&
+                                  isOverdue(event.start.dateTime)
                                     ? "text-destructive"
                                     : ""
                                 }
                               >
-                                {event.due
-                                  ? formatDate(event.due)
-                                  : "No due date"}
+                                {event.start.dateTime
+                                  ? formatDate(event.start.dateTime)
+                                  : "No date defined"}
                               </span>
                             </div>
                           </div>
                           <Badge
                             variant={
-                              event.due && isOverdue(event.due)
+                              event.start.dateTime &&
+                              isOverdue(event.start.dateTime)
                                 ? "destructive"
-                                : event.due && isToday(event.due)
+                                : event.start.dateTime &&
+                                  isToday(event.start.dateTime)
                                 ? "default"
                                 : "outline"
                             }
                           >
-                            {event.due && isOverdue(event.due)
+                            {event.start.dateTime &&
+                            isOverdue(event.start.dateTime)
                               ? "Overdue"
-                              : event.due && isToday(event.due)
+                              : event.start.dateTime &&
+                                isToday(event.start.dateTime)
                               ? "Today"
                               : "Upcoming"}
                           </Badge>
@@ -336,14 +348,15 @@ export default async function DashboardPage() {
                           <Clock className="h-3.5 w-3.5" />
                           <span
                             className={
-                              event.due &&
-                              isOverdue(event.due) &&
+                              event.start.dateTime &&
+                              isOverdue(event.start.dateTime) &&
                               event.status !== "completed"
                                 ? "text-destructive"
                                 : ""
                             }
                           >
-                            {event.due && formatDate(event.due)}
+                            {event.start.dateTime &&
+                              formatDate(event.start.dateTime)}
                           </span>
                         </div>
                       </div>
@@ -352,18 +365,22 @@ export default async function DashboardPage() {
                           variant={
                             event.status === "completed"
                               ? "secondary"
-                              : event.due && isOverdue(event.due)
+                              : event.start.dateTime &&
+                                isOverdue(event.start.dateTime)
                               ? "destructive"
-                              : event.due && isToday(event.due)
+                              : event.start.dateTime &&
+                                isToday(event.start.dateTime)
                               ? "default"
                               : "outline"
                           }
                         >
                           {event.status === "completed"
                             ? "Completed"
-                            : event.due && isOverdue(event.due)
+                            : event.start.dateTime &&
+                              isOverdue(event.start.dateTime)
                             ? "Overdue"
-                            : event.due && isToday(event.due)
+                            : event.start.dateTime &&
+                              isToday(event.start.dateTime)
                             ? "Today"
                             : "Upcoming"}
                         </Badge>

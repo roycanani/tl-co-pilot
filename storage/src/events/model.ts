@@ -1,6 +1,7 @@
 import { Schema, model } from "mongoose";
 
 export interface Event {
+  userId: string;
   id: string;
   status: string;
   htmlLink: string;
@@ -29,10 +30,12 @@ export interface Event {
     useDefault: boolean;
     overrides?: Array<{ method: string; minutes: number }>;
   };
+  finished: boolean;
 }
 
 const eventSchema = new Schema<Event>({
   id: { type: String, required: true },
+  userId: { type: String, required: true, default: "" },
   status: { type: String, required: true },
   htmlLink: { type: String, required: true },
   created: { type: String, required: true },
@@ -65,6 +68,7 @@ const eventSchema = new Schema<Event>({
       },
     ],
   },
+  finished: { type: Boolean, default: false },
 });
 
 export const eventModel = model<Event>("Event", eventSchema);

@@ -159,4 +159,26 @@ router.put("/:id", tasksController.update.bind(tasksController));
  */
 router.delete("/:id", tasksController.delete.bind(tasksController));
 
+/**
+ * @swagger
+ * /tasks/finished/{id}:
+ *   patch:
+ *     summary: Mark a task as finished
+ *     tags: [Tasks]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The task ID
+ *     responses:
+ *       200:
+ *         description: Task marked as finished successfully
+ */
+router.patch(
+  "/finished/:id",
+  tasksController.markAsFinished.bind(tasksController)
+);
+
 export default router;

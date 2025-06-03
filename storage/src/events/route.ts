@@ -183,4 +183,26 @@ router.put("/:id", eventsController.update.bind(eventsController));
  */
 router.delete("/:id", eventsController.delete.bind(eventsController));
 
+/**
+ * @swagger
+ * /events/finished/{id}:
+ *   patch:
+ *     summary: Mark a event as finished
+ *     tags: [Events]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The event ID
+ *     responses:
+ *       200:
+ *         description: Event marked as finished successfully
+ */
+router.patch(
+  "/finished/:id",
+  eventsController.markAsFinished.bind(eventsController)
+);
+
 export default router;

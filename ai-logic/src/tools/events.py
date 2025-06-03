@@ -40,7 +40,9 @@ class Event(BaseModel):
         description="The end time with 'dateTime' and 'timeZone' fields inside dictionary."
     )
     reminders: Dict[str, bool] = Field(
-        description="The reminders for the event, defaults to using default reminders."
+        description="The reminders for the event, defaults to using default reminders.",
+        default_factory=lambda: {"useDefault": True},
+        examples=[{"useDefault": True}],
     )
 
 
@@ -67,7 +69,20 @@ def schedule_meeting(
         description (str): The description of the event.
         start (dict): The start time with "dateTime" and optional "timeZone" fields.
         end (dict): The end time with "dateTime" and optional "timeZone" fields.
-        reminders (dict): The reminders for the event, defaults to using default reminders.
+        reminders (dict): The reminders for the event, defaults to using default reminders. e.g., {"useDefault": True}.
+    
+    Example:
+        {
+            "summary": "Team Meeting",
+            "location": "Conference Room A",
+            "description": "Discuss project updates and next steps.",
+            "start": {"dateTime": "2025-04-15T10:00:00Z", "timeZone": "UTC"},
+            "end": {"dateTime": "2025-04-15T11:00:00Z", "timeZone": "UTC"},
+            "reminders": {"useDefault": True}
+        }
+
+    Returns:
+        Dict[str, Any]: The created event details.
     """
     # Get user credentials through OAuth
     try:
