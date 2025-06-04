@@ -1,0 +1,75 @@
+"use client";
+
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+
+interface FinishItemCheckboxProps {
+  itemId: string;
+  itemType: "event" | "task";
+  className?: string;
+}
+
+export function FinishItemCheckbox({
+  itemId,
+  itemType,
+  className,
+}: FinishItemCheckboxProps) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  const checkboxId = `finish-${itemType}-${itemId}`;
+
+  const handleFinish = async () => {
+    setError(null); // Clear previous errors
+    try {
+      const response = await fetch(
+        `http://localhost:3000/${itemType}s/finished/${itemId}`,
+        {
+          method: "PATCH",
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({
+          message: `Failed to mark ${itemType} as finished.`,
+        }));
+        throw new Error(errorData.message || `HTTP error ${response.status}`);
+      }
+
+      // Refresh server components and re-fetch data
+      startTransition(() => {
+        router.refresh();
+      });
+    } catch (err) {
+      console.error(`Error finishing ${itemType} ${itemId}:`, err);
+      setError(err instanceof Error ? err.message : String(err));
+      // Optionally, inform the user via a toast notification or inline message
+    }
+  };
+
+  return (
+    <div className={`flex items-center space-x-2 ${className}`}>
+      <Checkbox
+        id={checkboxId}
+        onCheckedChange={(checked) => {
+          // `checked` can be true, false, or 'indeterminate' for shadcn Checkbox
+          if (checked === true) {
+            handleFinish();
+          }
+        }}
+        disabled={isPending}
+        aria-label={`Mark this ${itemType} as done`}
+      />
+      <Label
+        htmlFor={checkboxId}
+        className="text-sm cursor-pointer select-none"
+      >
+        Done
+      </Label>
+      {error && <p className="text-xs text-destructive ml-2">{error}</p>}
+    </div>
+  );
+}

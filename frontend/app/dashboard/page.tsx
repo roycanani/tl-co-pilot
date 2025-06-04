@@ -14,6 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FinishItemCheckbox } from "@/components/FinishItemCheckbox"; // Adjust path if needed
 
 interface UpcomingEvents {
   dateTime: string;
@@ -29,10 +30,11 @@ interface UpcomingEvents {
   description: string;
   updated: string;
   status: string;
-  start: UpcomingEvents;
-  end: UpcomingEvents;
+  start: UpcomingEvents; // This seems to be a recursive type, ensure it's intended. Assuming the inner UpcomingEvents is for start/end dates.
+  end: UpcomingEvents; // Same as above.
   htmlLink: string;
   __v: number;
+  finished: boolean;
 }
 
 // Mock data for tasks
@@ -47,6 +49,7 @@ interface TasksToBeDone {
   due?: string;
   webViewLink: string;
   __v: number;
+  finished: boolean;
 }
 
 // Helper function to format dates
@@ -82,8 +85,6 @@ function isToday(dateString: string) {
 export default async function DashboardPage() {
   let upcomingEvents: UpcomingEvents[] = [];
   let tasksToBeDone: TasksToBeDone[] = [];
-  process.stdout.write(`Upcoming Events:\n`);
-  console.log("Upcoming Tasks:");
 
   // Fetch upcoming events and tasks from the API
   try {
@@ -107,6 +108,10 @@ export default async function DashboardPage() {
   } catch (error) {
     console.error("Error fetching tasks:", error);
   }
+
+  // Filter out finished items
+  const nonFinishedEvents = upcomingEvents.filter((event) => !event.finished);
+  const nonFinishedTasks = tasksToBeDone.filter((task) => !task.finished);
 
   return (
     <div className="container mx-auto py-6">
@@ -136,11 +141,11 @@ export default async function DashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {upcomingEvents.length}
+                    {nonFinishedEvents.length}
                   </div>
                   <p className="text-xs text-muted-foreground">
                     {
-                      upcomingEvents.filter(
+                      nonFinishedEvents.filter(
                         (event) =>
                           event.start.dateTime && isToday(event.start.dateTime)
                       ).length
@@ -160,14 +165,14 @@ export default async function DashboardPage() {
                 <CardContent>
                   <div className="text-2xl font-bold">
                     {
-                      tasksToBeDone.filter(
+                      nonFinishedTasks.filter(
                         (task) => task.status === "needsAction"
                       ).length
                     }
                   </div>
                   <p className="text-xs text-muted-foreground">
                     {
-                      tasksToBeDone.filter(
+                      nonFinishedTasks.filter(
                         (task) =>
                           task.status === "needsAction" &&
                           task.due &&
@@ -188,13 +193,11 @@ export default async function DashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {
-                      tasksToBeDone.filter(
-                        (task) => task.status === "completed"
-                      ).length
-                    }
+                    {tasksToBeDone.filter((task) => task.finished).length}
                   </div>
-                  <p className="text-xs text-muted-foreground">This week</p>
+                  <p className="text-xs text-muted-foreground">
+                    This week (not yet hidden)
+                  </p>
                 </CardContent>
               </Card>
             </div>
@@ -208,8 +211,8 @@ export default async function DashboardPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {upcomingEvents
-                    .filter((event) => event.status !== "completed")
+                  {nonFinishedEvents // Use nonFinishedEvents
+                    .filter((event) => event.status !== "completed") // Keep this if 'status' is distinct from 'finished'
                     .slice(0, 3)
                     .map((event) => (
                       <div
@@ -234,26 +237,33 @@ export default async function DashboardPage() {
                                   : "No date defined"}
                               </span>
                             </div>
+                            <FinishItemCheckbox
+                              itemId={event.id}
+                              itemType="event"
+                              className="mt-2"
+                            />
                           </div>
-                          <Badge
-                            variant={
-                              event.start.dateTime &&
+                          <div className="flex flex-col items-end space-y-1">
+                            <Badge
+                              variant={
+                                event.start.dateTime &&
+                                isOverdue(event.start.dateTime)
+                                  ? "destructive"
+                                  : event.start.dateTime &&
+                                    isToday(event.start.dateTime)
+                                  ? "default"
+                                  : "outline"
+                              }
+                            >
+                              {event.start.dateTime &&
                               isOverdue(event.start.dateTime)
-                                ? "destructive"
+                                ? "Overdue"
                                 : event.start.dateTime &&
                                   isToday(event.start.dateTime)
-                                ? "default"
-                                : "outline"
-                            }
-                          >
-                            {event.start.dateTime &&
-                            isOverdue(event.start.dateTime)
-                              ? "Overdue"
-                              : event.start.dateTime &&
-                                isToday(event.start.dateTime)
-                              ? "Today"
-                              : "Upcoming"}
-                          </Badge>
+                                ? "Today"
+                                : "Upcoming"}
+                            </Badge>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -273,8 +283,8 @@ export default async function DashboardPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {tasksToBeDone
-                    .filter((task) => task.status === "needsAction")
+                  {nonFinishedTasks // Use nonFinishedTasks
+                    .filter((task) => task.status === "needsAction") // Keep this if 'status' is distinct from 'finished'
                     .slice(0, 3)
                     .map((task) => (
                       <div
@@ -298,22 +308,29 @@ export default async function DashboardPage() {
                                   : "No due date"}
                               </span>
                             </div>
+                            <FinishItemCheckbox
+                              itemId={task.id}
+                              itemType="task"
+                              className="mt-2"
+                            />
                           </div>
-                          <Badge
-                            variant={
-                              task.due && isOverdue(task.due)
-                                ? "destructive"
+                          <div className="flex flex-col items-end space-y-1">
+                            <Badge
+                              variant={
+                                task.due && isOverdue(task.due)
+                                  ? "destructive"
+                                  : task.due && isToday(task.due)
+                                  ? "default"
+                                  : "outline"
+                              }
+                            >
+                              {task.due && isOverdue(task.due)
+                                ? "Overdue"
                                 : task.due && isToday(task.due)
-                                ? "default"
-                                : "outline"
-                            }
-                          >
-                            {task.due && isOverdue(task.due)
-                              ? "Overdue"
-                              : task.due && isToday(task.due)
-                              ? "Today"
-                              : "Upcoming"}
-                          </Badge>
+                                ? "Today"
+                                : "Upcoming"}
+                            </Badge>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -332,79 +349,85 @@ export default async function DashboardPage() {
               <CardHeader>
                 <CardTitle>All Events</CardTitle>
                 <CardDescription>
-                  Complete list of your upcoming and past events
+                  Complete list of your upcoming events
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {upcomingEvents.map((event) => (
-                  <div
-                    key={event.id}
-                    className="flex flex-col space-y-2 border-b pb-4 last:border-0"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-medium">{event.description}</h3>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Clock className="h-3.5 w-3.5" />
-                          <span
-                            className={
+                {nonFinishedEvents.map(
+                  (
+                    event // Use nonFinishedEvents
+                  ) => (
+                    <div
+                      key={event.id}
+                      className="flex flex-col space-y-2 border-b pb-4 last:border-0"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h3 className="font-medium">{event.description}</h3>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Clock className="h-3.5 w-3.5" />
+                            <span
+                              className={
+                                // status !== "completed" is implicitly handled by !event.finished if finished implies completed
+                                event.start.dateTime &&
+                                isOverdue(event.start.dateTime)
+                                  ? "text-destructive"
+                                  : ""
+                              }
+                            >
+                              {event.start.dateTime &&
+                                formatDate(event.start.dateTime)}
+                            </span>
+                          </div>
+                          <FinishItemCheckbox
+                            itemId={event.id}
+                            itemType="event"
+                            className="mt-2"
+                          />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant={
+                              // status === "completed" items are filtered out if finished=true implies completed
                               event.start.dateTime &&
-                              isOverdue(event.start.dateTime) &&
-                              event.status !== "completed"
-                                ? "text-destructive"
-                                : ""
+                              isOverdue(event.start.dateTime)
+                                ? "destructive"
+                                : event.start.dateTime &&
+                                  isToday(event.start.dateTime)
+                                ? "default"
+                                : "outline"
                             }
                           >
-                            {event.start.dateTime &&
-                              formatDate(event.start.dateTime)}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge
-                          variant={
-                            event.status === "completed"
-                              ? "secondary"
-                              : event.start.dateTime &&
-                                isOverdue(event.start.dateTime)
-                              ? "destructive"
+                            {event.start.dateTime && // status === "completed" items are filtered out
+                            isOverdue(event.start.dateTime)
+                              ? "Overdue"
                               : event.start.dateTime &&
                                 isToday(event.start.dateTime)
-                              ? "default"
-                              : "outline"
-                          }
-                        >
-                          {event.status === "completed"
-                            ? "Completed"
-                            : event.start.dateTime &&
-                              isOverdue(event.start.dateTime)
-                            ? "Overdue"
-                            : event.start.dateTime &&
-                              isToday(event.start.dateTime)
-                            ? "Today"
-                            : "Upcoming"}
-                        </Badge>
-                        <Link
-                          href={event.htmlLink ?? ""}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
+                              ? "Today"
+                              : "Upcoming"}
+                          </Badge>
+                          <Link
+                            href={event.htmlLink ?? ""}
+                            target="_blank"
+                            rel="noopener noreferrer"
                           >
-                            <ExternalLink className="h-4 w-4" />
-                            <span className="sr-only">Open link</span>
-                          </Button>
-                        </Link>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                              <span className="sr-only">Open link</span>
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        Last updated: {new Date(event.updated).toLocaleString()}
                       </div>
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      Last updated: {new Date(event.updated).toLocaleString()}
-                    </div>
-                  </div>
-                ))}
+                  )
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -414,74 +437,80 @@ export default async function DashboardPage() {
               <CardHeader>
                 <CardTitle>All Tasks</CardTitle>
                 <CardDescription>
-                  Complete list of your pending and completed tasks
+                  Complete list of your pending tasks
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {tasksToBeDone.map((task) => (
-                  <div
-                    key={task.id}
-                    className="flex flex-col space-y-2 border-b pb-4 last:border-0"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-medium">{task.title}</h3>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Clock className="h-3.5 w-3.5" />
-                          <span
-                            className={
-                              task.due &&
-                              isOverdue(task.due) &&
-                              task.status !== "completed"
-                                ? "text-destructive"
-                                : ""
+                {nonFinishedTasks.map(
+                  (
+                    task // Use nonFinishedTasks
+                  ) => (
+                    <div
+                      key={task.id}
+                      className="flex flex-col space-y-2 border-b pb-4 last:border-0"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h3 className="font-medium">{task.title}</h3>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Clock className="h-3.5 w-3.5" />
+                            <span
+                              className={
+                                // status !== "completed" is implicitly handled by !task.finished
+                                task.due && isOverdue(task.due)
+                                  ? "text-destructive"
+                                  : ""
+                              }
+                            >
+                              {task.due ? formatDate(task.due) : "No due date"}
+                            </span>
+                          </div>
+                          <FinishItemCheckbox
+                            itemId={task.id}
+                            itemType="task"
+                            className="mt-2"
+                          />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant={
+                              // status === "completed" items are filtered out if finished=true implies completed
+                              task.due && isOverdue(task.due)
+                                ? "destructive"
+                                : task.due && isToday(task.due)
+                                ? "default"
+                                : "outline"
                             }
                           >
-                            {task.due ? formatDate(task.due) : "No due date"}
-                          </span>
+                            {task.due && isOverdue(task.due) // status === "completed" items are filtered out
+                              ? "Overdue"
+                              : task.due && isToday(task.due)
+                              ? "Today"
+                              : "Upcoming"}
+                          </Badge>
+
+                          <Link
+                            href={task.webViewLink ?? ""}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                              <span className="sr-only">Open link</span>
+                            </Button>
+                          </Link>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Badge
-                          variant={
-                            task.status === "completed"
-                              ? "secondary"
-                              : task.due && isOverdue(task.due)
-                              ? "destructive"
-                              : task.due && isToday(task.due)
-                              ? "default"
-                              : "outline"
-                          }
-                        >
-                          {task.status === "completed"
-                            ? "Completed"
-                            : task.due && isOverdue(task.due)
-                            ? "Overdue"
-                            : task.due && isToday(task.due)
-                            ? "Today"
-                            : "Upcoming"}
-                        </Badge>
-                        <Link
-                          href={task.webViewLink ?? ""}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                            <span className="sr-only">Open link</span>
-                          </Button>
-                        </Link>
+                      <div className="text-sm text-muted-foreground">
+                        Last updated: {new Date(task.updated).toLocaleString()}
                       </div>
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      Last updated: {new Date(task.updated).toLocaleString()}
-                    </div>
-                  </div>
-                ))}
+                  )
+                )}
               </CardContent>
             </Card>
           </TabsContent>

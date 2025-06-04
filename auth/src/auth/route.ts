@@ -59,7 +59,7 @@ router.get(
       "https://www.googleapis.com/auth/calendar",
     ],
     accessType: "offline",
-    prompt: "consent",
+    // prompt: "consent",
   })
 );
 

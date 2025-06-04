@@ -8,9 +8,30 @@ import express, { Express } from "express";
 import postsRouter from "./posts/route";
 import eventsRouter from "./events/route";
 import tasksRouter from "./tasks/route";
+import cors from "cors";
 
 const app = express();
 
+const corsOptions = {
+  origin: [
+    "*",
+    "http://localhost:3000",
+    "https://localhost:3000",
+    "http://localhost",
+    "https://localhost",
+  ],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "X-Requested-With",
+    "Accept",
+    "Origin",
+    "Access-Control-Allow-Origin",
+  ],
+  optionsSuccessStatus: 200,
+};
+app.use(cors(corsOptions));
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.path}`);
   next(); // Pass control to the next middleware or route handler
