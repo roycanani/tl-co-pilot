@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Fetch user info using the token if needed
         try {
-          const response = await fetch("http://localhost:4000/auth/user-info", {
+          const response = await fetch("http://localhost/api/auth/user-info", {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -84,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Redirect to the auth service for login - no parameters needed
   const login = () => {
-    window.location.href = "http://localhost:4000/auth/google";
+    window.location.href = "http://localhost/api/auth/google";
   };
 
   // Log out the user

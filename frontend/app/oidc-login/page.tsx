@@ -27,7 +27,7 @@ export default function OIDCLoginPage() {
 
   function initiateLogin() {
     // Simply redirect to your authentication microservice - no parameters needed
-    window.location.href = "http://localhost:4000/auth/google";
+    window.location.href = "http://localhost/api/auth/google";
   }
 
   return (
