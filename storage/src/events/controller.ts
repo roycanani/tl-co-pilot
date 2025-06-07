@@ -7,6 +7,30 @@ class EventsController extends BaseController<Event> {
     super(eventModel);
   }
 
+  async getByUserId(req: Request, res: Response) {
+    const userId = req.params.userId;
+    try {
+      const events = await this.model.find({ userId: userId });
+      if (!events || events.length === 0) {
+        res.status(404).send({ message: "No events found for this user" });
+        return;
+      }
+      res.send(events);
+    } catch (error) {
+      const err = error as Error;
+      if (err.name === "MongoServerSelectionError") {
+        res.status(500).send({
+          message: "Internal Server Error",
+          details: "Database connection error",
+        });
+      } else {
+        res
+          .status(500)
+          .send({ message: "Internal Server Error", details: err.message });
+      }
+    }
+  }
+
   async markAsFinished(req: Request, res: Response) {
     const eventId = req.params.id;
     try {

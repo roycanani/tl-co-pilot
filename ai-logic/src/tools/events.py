@@ -53,6 +53,7 @@ class Event(BaseModel):
 )
 def schedule_meeting(
     credentials: Credentials,
+    user_id: str,
     summary: str,
     location: str,
     description: str,
@@ -111,7 +112,7 @@ def schedule_meeting(
             headers={
                 "accept": "application/json, text/plain, */*",
             },
-            json=created_event,
+            json={**created_event, "userId": user_id},
             verify=False,
         )
         print(f"Event created: {created_event}")

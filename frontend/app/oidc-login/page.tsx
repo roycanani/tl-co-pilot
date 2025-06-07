@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import config from "@/lib/config";
+import { useAuth } from "@/context/auth-context";
 
 export default function OIDCLoginPage() {
   const router = useRouter();
+  const { setToken, setIsAuthenticated } = useAuth();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -14,16 +16,26 @@ export default function OIDCLoginPage() {
   const accessToken = searchParams.get("accessToken");
 
   useEffect(() => {
-    if (accessToken) {
-      // Store the access token in localStorage
-      localStorage.setItem("accessToken", accessToken);
-
-      // Redirect to dashboard/home after successful login
-      router.push("/dashboard");
-    } else {
-      // If no token is present in the URL, this page is being accessed directly
-      setIsLoading(false);
-    }
+    const handleLogin = async () => {
+      if (accessToken) {
+        // Store the access token in localStorage
+        setToken(accessToken);
+        setIsAuthenticated(true);
+        localStorage.setItem("accessToken", accessToken);
+        console.log("Access token not received:", accessToken);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        console.log(
+          "Access token received:",
+          localStorage.getItem("accessToken")
+        );
+        // Redirect to dashboard/home after successful login
+        router.push("/dashboard");
+      } else {
+        // If no token is present in the URL, this page is being accessed directly
+        setIsLoading(false);
+      }
+    };
+    handleLogin();
   }, [accessToken, router]);
 
   function initiateLogin() {

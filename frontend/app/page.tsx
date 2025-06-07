@@ -8,7 +8,7 @@ export default function HomePage() {
 
   return (
     <div className="container mx-auto flex min-h-screen flex-col items-center justify-center p-4">
-      <h1 className="mb-8 text-4xl font-bold">Welcome to Our App</h1>
+      <h1 className="mb-8 text-4xl font-bold">Welcome Team Leader</h1>
 
       {isAuthenticated ? (
         <div className="text-center">

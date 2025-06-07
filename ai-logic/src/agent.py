@@ -37,7 +37,7 @@ class Agent:
 
         self.messages = [self.system_message]
 
-    def trigger(self, user_query, credentials):
+    def trigger(self, user_query, credentials, user_id):
         # Format the user input with instructions
         user_input = HumanMessage(
             "Analyze this meeting transcript and identify ALL actionable items. For EACH item:\n"
@@ -60,10 +60,12 @@ class Agent:
             if tool_call["name"] == "schedule_meeting":
                 print("Schedule Meeting:", tool_call["args"])
                 tool_call["args"]["credentials"] = credentials
+                tool_call["args"]["user_id"] = user_id
                 schedule_meeting.invoke(tool_call["args"])
             elif tool_call["name"] == "add_todo":
                 print("Add Todo:", tool_call["args"])
                 tool_call["args"]["credentials"] = credentials
+                tool_call["args"]["user_id"] = user_id
                 add_todo.invoke(tool_call["args"])
             else:
                 print(f"Unknown tool call: {tool_call.name}")

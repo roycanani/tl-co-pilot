@@ -99,6 +99,33 @@ router.get("/:id", tasksController.getById.bind(tasksController));
 
 /**
  * @swagger
+ * /tasks/user/{userId}:
+ *   get:
+ *     summary: Get tasks by User ID
+ *     tags: [Tasks]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The User ID
+ *     responses:
+ *       200:
+ *         description: List of tasks for the user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Task'
+ *       404:
+ *         description: No tasks found for this user
+ */
+router.get("/user/:userId", tasksController.getByUserId.bind(tasksController));
+
+/**
+ * @swagger
  * /tasks:
  *   post:
  *     summary: Create a new task

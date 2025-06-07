@@ -3,22 +3,22 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import config from "@/lib/config";
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 interface FinishItemCheckboxProps {
   itemId: string;
   itemType: "event" | "task";
   className?: string;
+  onCheckCallBack: (itemId: string) => void;
 }
 
 export function FinishItemCheckbox({
   itemId,
   itemType,
   className,
+  onCheckCallBack,
 }: FinishItemCheckboxProps) {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const [isPending] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   const checkboxId = `finish-${itemType}-${itemId}`;
@@ -40,10 +40,11 @@ export function FinishItemCheckbox({
         throw new Error(errorData.message || `HTTP error ${response.status}`);
       }
 
+      onCheckCallBack(itemId);
       // Refresh server components and re-fetch data
-      startTransition(() => {
-        router.refresh();
-      });
+      // startTransition(() => {
+      //   router.refresh();
+      // });
     } catch (err) {
       console.error(`Error finishing ${itemType} ${itemId}:`, err);
       setError(err instanceof Error ? err.message : String(err));

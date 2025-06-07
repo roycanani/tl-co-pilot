@@ -55,7 +55,7 @@ async def process_transcript(request: TranscriptRequest) -> str:
     try:
         print("Recived message for user: ", request.user_id)
         credentials = get_credentials(request.user_id)
-        response = agent.trigger(request.transcript, credentials)
+        response = agent.trigger(request.transcript, credentials, request.user_id)
         print("Response from agent:", response)
         return response
     except HTTPException as e:

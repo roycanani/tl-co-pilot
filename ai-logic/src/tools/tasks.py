@@ -29,7 +29,7 @@ class Task(BaseModel):
     parse_docstring=True,
 )
 def add_todo(
-    title: str, notes: str, due: str, credentials: Credentials
+    title: str, notes: str, due: str, credentials: Credentials, user_id: str
 ) -> Dict[str, Any]:
     """
     Creates a new task in Google Tasks.
@@ -74,7 +74,7 @@ def add_todo(
             headers={
                 "accept": "application/json, text/plain, */*",
             },
-            json=created_task,
+            json={**created_task, "userId": user_id},
             verify=False,
         )
 

@@ -7,6 +7,30 @@ class TasksController extends BaseController<Task> {
     super(taskModel);
   }
 
+  async getByUserId(req: Request, res: Response) {
+    const userId = req.params.userId;
+    try {
+      const tasks = await this.model.find({ userId: userId });
+      if (!tasks || tasks.length === 0) {
+        res.status(404).send({ message: "No tasks found for this user" });
+        return;
+      }
+      res.send(tasks);
+    } catch (error) {
+      const err = error as Error;
+      if (err.name === "MongoServerSelectionError") {
+        res.status(500).send({
+          message: "Internal Server Error",
+          details: "Database connection error",
+        });
+      } else {
+        res
+          .status(500)
+          .send({ message: "Internal Server Error", details: err.message });
+      }
+    }
+  }
+
   async markAsFinished(req: Request, res: Response) {
     const taskId = req.params.id;
     try {

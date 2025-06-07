@@ -1,13 +1,13 @@
 "use client";
 
 import config from "@/lib/config";
-import { parseJwt } from "@/lib/utils";
 import {
   createContext,
   useContext,
   useState,
   useEffect,
   ReactNode,
+  useCallback,
 } from "react";
 
 // Define the User type
@@ -28,6 +28,7 @@ interface AuthContextType {
   logout: () => void;
   getToken: () => string | null;
   setToken: (token: string | null) => void;
+  setIsAuthenticated: (isAuthenticated: boolean) => void;
 }
 
 // Create the context
@@ -38,7 +39,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  // Get the stored token
+  const getToken = () => {
+    return localStorage.getItem("accessToken");
+  };
+
+  const setToken = useCallback((token: string | null) => {
+    localStorage.setItem("accessToken", token || "");
+  }, []);
+
   useEffect(() => {
+    console.log("AuthProvider mounted");
     // Check if user is authenticated on component mount
     const checkAuth = async () => {
       try {
@@ -81,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     checkAuth();
-  }, []);
+  }, [isAuthenticated, setToken]);
 
   // Redirect to the auth service for login - no parameters needed
   const login = () => {
@@ -97,15 +108,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.location.href = "/";
   };
 
-  // Get the stored token
-  const getToken = () => {
-    return localStorage.getItem("accessToken");
-  };
-
-  const setToken = (token: string | null) => {
-    localStorage.setItem("accessToken", token || "");
-  };
-
   return (
     <AuthContext.Provider
       value={{
@@ -116,6 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         getToken,
         setToken,
+        setIsAuthenticated,
       }}
     >
       {children}

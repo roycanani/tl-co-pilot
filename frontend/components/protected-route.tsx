@@ -13,6 +13,9 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
     if (!isLoading && !isAuthenticated) {
       router.push("/oidc-login");
     }
+    console.log("ProtectedRoute: isAuthenticated:", isAuthenticated);
+    console.log("ProtectedRoute: isLoading:", isLoading);
+    console.log("ProtectedRoute: router:", router);
   }, [isAuthenticated, isLoading, router]);
 
   if (isLoading) {

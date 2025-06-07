@@ -85,6 +85,7 @@ router.get(
   passport.authenticate("google", {
     session: false,
     failureRedirect: "/login", // Adjust as needed, perhaps to an error page or frontend route
+    prompt: "consent",
   }),
   authController.loginOIDC
 );

@@ -123,6 +123,36 @@ router.get("/:id", eventsController.getById.bind(eventsController));
 
 /**
  * @swagger
+ * /events/user/{userId}:
+ *   get:
+ *     summary: Get events by User ID
+ *     tags: [Events]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The User ID
+ *     responses:
+ *       200:
+ *         description: List of events for the user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Event'
+ *       404:
+ *         description: No events found for this user
+ */
+router.get(
+  "/user/:userId",
+  eventsController.getByUserId.bind(eventsController)
+);
+
+/**
+ * @swagger
  * /events:
  *   post:
  *     summary: Create a new event
