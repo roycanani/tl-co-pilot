@@ -1,5 +1,6 @@
 "use client";
 
+import config from "@/lib/config";
 import { parseJwt } from "@/lib/utils";
 import {
   createContext,
@@ -52,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Fetch user info using the token if needed
         try {
-          const response = await fetch("http://localhost/api/auth/user-info", {
+          const response = await fetch(`${config.authUrl}/user-info`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -84,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Redirect to the auth service for login - no parameters needed
   const login = () => {
-    window.location.href = "http://localhost/api/auth/google";
+    window.location.href = `${config.authUrl}/google`;
   };
 
   // Log out the user

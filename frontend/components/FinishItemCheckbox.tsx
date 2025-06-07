@@ -2,6 +2,7 @@
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import config from "@/lib/config";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
@@ -26,7 +27,7 @@ export function FinishItemCheckbox({
     setError(null); // Clear previous errors
     try {
       const response = await fetch(
-        `http://localhost:3000/${itemType}s/finished/${itemId}`,
+        `${config.storageUrl}/${itemType}s/finished/${itemId}`,
         {
           method: "PATCH",
         }

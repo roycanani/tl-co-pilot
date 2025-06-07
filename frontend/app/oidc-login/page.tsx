@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import config from "@/lib/config";
 
 export default function OIDCLoginPage() {
   const router = useRouter();
@@ -27,7 +28,7 @@ export default function OIDCLoginPage() {
 
   function initiateLogin() {
     // Simply redirect to your authentication microservice - no parameters needed
-    window.location.href = "http://localhost/api/auth/google";
+    window.location.href = `${config.authUrl}/google`;
   }
 
   return (

@@ -55,7 +55,7 @@ const AuthProvider = ({
   };
 
   useEffect(() => {
-    axios.defaults.baseURL = config.apiUrl;
+    axios.defaults.baseURL = config.authUrl;
     const interceptorId = axios.interceptors.request.use((config) => {
       if (authState.token) {
         config.headers.Authorization = `Bearer ${authState.token}`;
