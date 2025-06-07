@@ -119,7 +119,7 @@ services:
     restart: unless-stopped
 
   redis:
-    image: redis:alpine
+    image: redis:latest
     ports:
       - "6379:6379"
     volumes:
