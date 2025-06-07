@@ -22,7 +22,7 @@ const GoogleLogin: React.FC = () => {
       localStorage.setItem("userId", userId);
 
       setToken(accessToken);
-      router.push("/feed");
+      router.push("/dashboard");
     } else {
       console.error("Tokens missing from URL");
       router.push("/login");

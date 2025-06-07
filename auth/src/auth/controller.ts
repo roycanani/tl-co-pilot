@@ -3,7 +3,6 @@ import { userModel } from "../users/model";
 import { generateToken } from "../common/jwt";
 import jwt from "jsonwebtoken";
 import { Document } from "mongoose";
-import { redisClient } from "../common/redis";
 
 interface Tokens {
   accessToken: string;
