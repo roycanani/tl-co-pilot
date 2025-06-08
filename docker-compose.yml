@@ -3,10 +3,10 @@ services:
     image: nginx:alpine
     ports:
       - "80:80"
-      - "443:443"  # Add HTTPS port
+      - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro  # Add SSL certificates volume
+      - ./nginx/ssl:/etc/nginx/ssl:ro
     depends_on:
       - frontend
       - auth
