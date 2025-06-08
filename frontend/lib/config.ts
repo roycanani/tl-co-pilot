@@ -5,15 +5,9 @@ interface Config {
 }
 
 const config: Config = {
-  // eslint-disable-next-line no-undef
-  authUrl: process.env.REACT_APP_API_URL || "http://localhost/api/auth",
-
-  // eslint-disable-next-line no-undef
-  baseUrl: process.env.REACT_APP_BASE_URL || "http://localhost",
-
-  // eslint-disable-next-line no-undef
-  storageUrl:
-    process.env.REACT_APP_STORAGE_URL || "http://localhost/api/storage",
+  authUrl: process.env.NEXT_PUBLIC_API_URL || "http://localhost/api/auth",
+  baseUrl: process.env.NEXT_PUBLIC_BASE_URL || "http://localhost",
+  storageUrl: process.env.NEXT_PUBLIC_STORAGE_URL || "http://localhost/api/storage",
 };
 
 export default config;
