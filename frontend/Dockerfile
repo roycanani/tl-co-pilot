@@ -19,8 +19,16 @@ COPY . .
 # Update next.config.ts to enable standalone output
 RUN sed -i 's/output: .*/output: "standalone",/g' next.config.ts || echo 'output: "standalone",' >> next.config.ts
 
-# Build the application for production
-# Replace 'build' with your actual build script name in package.json if different
+# Build arguments for environment variables
+ARG REACT_APP_API_URL
+ARG REACT_APP_BASE_URL  
+ARG REACT_APP_STORAGE_URL
+
+# Set environment variables for build
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
+ENV REACT_APP_BASE_URL=$REACT_APP_BASE_URL
+ENV REACT_APP_STORAGE_URL=$REACT_APP_STORAGE_URL
+
 RUN pnpm build
 
 # Stage 2: Run the Next.js application
