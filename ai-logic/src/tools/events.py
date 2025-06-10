@@ -34,10 +34,12 @@ class Event(BaseModel):
         description="The description of the event.",
     )
     start: Dict[str, str] = Field(
-        description="The start time with 'dateTime' and 'timeZone' fields inside dictionary."
+        description="The start time with 'dateTime' and 'timeZone' fields inside dictionary.",
+        examples=[{"dateTime": "2025-04-15T10:00:00Z", "timeZone": "UTC"}]
     )
     end: Dict[str, str] = Field(
-        description="The end time with 'dateTime' and 'timeZone' fields inside dictionary."
+        description="The end time with 'dateTime' and 'timeZone' fields inside dictionary.",
+        examples=[{"dateTime": "2025-04-15T11:00:00Z", "timeZone": "UTC"}]
     )
     reminders: Dict[str, bool] = Field(
         description="The reminders for the event, defaults to using default reminders.",
@@ -57,9 +59,9 @@ def schedule_meeting(
     summary: str,
     location: str,
     description: str,
-    start: Dict[str, str],  # Changed from EventTime to Dict
-    end: Dict[str, str],  # Changed from EventTime to Dict
-    reminders: Dict[str, bool] = {"useDefault": True},  # Changed from EventReminders
+    start: Dict[str, str],
+    end: Dict[str, str],
+    reminders: Dict[str, bool] = {"useDefault": True},
 ) -> Dict[str, Any]:
     """
     Creates a new event in the Google Calendar.
