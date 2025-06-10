@@ -42,12 +42,15 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer());
     const filename = file.name.replaceAll(" ", "_");
     const pathToFile = path.join(process.cwd(), "public/assets/" + filename);
+    console.log("File path to save:", pathToFile);
     try {
       await writeFile(pathToFile, buffer);
     } catch (error) {
       console.log("Error occured ", error);
     }
 
+    console.log("File saved successfully at:", pathToFile);
+    console.log("Uploading file to GCP bucket:", bucketName);
     // Upload the file to GCP bucket
     const bucket = storage.bucket(bucketName);
     await bucket.upload(pathToFile, {

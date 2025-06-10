@@ -36,6 +36,9 @@ FROM node:18-alpine
 
 WORKDIR /app
 
+# Create necessary directories
+RUN mkdir -p public/assets
+
 # Copy standalone build
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
