@@ -72,6 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
           if (response.ok) {
             const userData = await response.json();
+            console.log("User data fetched:", userData);
             setUser(userData);
             setIsAuthenticated(true);
           } else {

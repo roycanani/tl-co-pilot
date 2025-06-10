@@ -22,7 +22,6 @@ export default function OIDCLoginPage() {
         setToken(accessToken);
         setIsAuthenticated(true);
         localStorage.setItem("accessToken", accessToken);
-        console.log("Access token not received:", accessToken);
         await new Promise((resolve) => setTimeout(resolve, 100));
         console.log(
           "Access token received:",
