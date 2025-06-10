@@ -98,8 +98,6 @@ services:
       - ./stt-backend/stt/.env
     volumes:
       - ./stt-backend/stt/credentials:/app/credentials
-    environment:
-      - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials/tl-co-pilot-3a62c5c8a92a.json
     depends_on:
       - mongo
       - redis
@@ -112,8 +110,6 @@ services:
       - ./stt-backend/ai-producer/.env
     volumes:
       - ./stt-backend/stt/credentials:/app/credentials
-    environment:
-      - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials/tl-co-pilot-3a62c5c8a92a.json
     depends_on:
       - mongo
       - redis
