@@ -27,19 +27,19 @@ class Event(BaseModel):
     """Represents an event in the Google Calendar."""
 
     summary: str = Field(description="The summary of the event.")
-    location: str = Field(
-        description="The location of the event.",
-    )
-    description: str = Field(
-        description="The description of the event.",
-    )
+    location: str = Field(description="The location of the event.")
+    description: str = Field(description="The description of the event.")
     start: Dict[str, str] = Field(
-        description="The start time with 'dateTime' and 'timeZone' fields inside dictionary.",
-        examples=[{"dateTime": "2025-04-15T10:00:00Z", "timeZone": "UTC"}]
+        description="The start time as a dictionary with 'dateTime' (ISO format) and 'timeZone' keys. Example: {'dateTime': '2025-04-15T10:00:00Z', 'timeZone': 'UTC'}",
+        json_schema_extra={
+            "example": {"dateTime": "2025-04-15T10:00:00Z", "timeZone": "UTC"}
+        }
     )
     end: Dict[str, str] = Field(
-        description="The end time with 'dateTime' and 'timeZone' fields inside dictionary.",
-        examples=[{"dateTime": "2025-04-15T11:00:00Z", "timeZone": "UTC"}]
+        description="The end time as a dictionary with 'dateTime' (ISO format) and 'timeZone' keys. Example: {'dateTime': '2025-04-15T11:00:00Z', 'timeZone': 'UTC'}",
+        json_schema_extra={
+            "example": {"dateTime": "2025-04-15T11:00:00Z", "timeZone": "UTC"}
+        }
     )
     reminders: Dict[str, bool] = Field(
         description="The reminders for the event, defaults to using default reminders.",
@@ -87,7 +87,12 @@ def schedule_meeting(
     Returns:
         Dict[str, Any]: The created event details.
     """
-    # Get user credentials through OAuth
+    # Convert string datetime to dict format if needed
+    if isinstance(start, str):
+        start = {"dateTime": start, "timeZone": "UTC"}
+    if isinstance(end, str):
+        end = {"dateTime": end, "timeZone": "UTC"}
+    
     try:
         service = build("calendar", "v3", credentials=credentials)
 
